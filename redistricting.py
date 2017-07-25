@@ -1,0 +1,261 @@
+import numpy as np
+import math
+
+### WARNING : this is for 2d for now!
+def EuclidVoronoi(C):
+    import scipy.spatial as sp
+    ## insert points to remove
+    ## infinite regions
+    boundary = np.array([[-20,-20],[20,-20],[-20,20],[20,20]])
+    
+    diagram = sp.Voronoi(np.concatenate((C,boundary)))
+    bounded_regions = []
+    for i in range(len(diagram.regions)):
+        region = []
+        bounded_R = True
+        if diagram.regions[i] == [] : continue
+        for j in diagram.regions[i]:
+            if j == -1 :
+                bounded_R = False
+                break ## region is infinite, can be discarded
+            region.append(diagram.vertices[j])
+        if bounded_R:
+            bounded_regions.append(region)
+    return OrderRegions(C,bounded_regions)
+
+def OrderRegions(C, bounded_regions):
+    from shapely.geometry import Point
+    from shapely.geometry.polygon import Polygon
+    ordered = []
+    for i in range(len(C)):
+        p = Point(C[i][0],C[i][1])
+        for i in range(len(bounded_regions)):
+            R = Polygon(bounded_regions[i])
+            if p.distance(R) == 0:
+                ordered.append(bounded_regions[i])
+                break
+    return ordered
+
+### WARNING : this is for 2d for now!
+def EuclidCost(A, bounded_regions):
+    from shapely.geometry import Point
+    from shapely.geometry.polygon import Polygon
+    cost = {}
+    for a in range(len(A)):
+        pa = Point(A[a][0],A[a][1])
+        cost[a] = {}
+        for i in range(len(bounded_regions)):
+            R = Polygon(bounded_regions[i])
+            cost[a][i] = pa.distance(R)
+    return cost
+
+
+def FindAssignment(nb_cells, cost):
+    import munkres as mk
+    cluster_size = int(len(cost)/nb_cells)
+    assign_mat = []
+    for v in range(len(cost)):
+        v_assign = []
+        for p in cost[v]:
+            for i in range(cluster_size):
+                v_assign.append(cost[v][p])
+        assign_mat.append(v_assign)
+    matrix = assign_mat
+    # print(cost[0], assign_mat)
+    m = mk.Munkres()
+    assignment = m.compute(matrix)
+    real_assignment = []
+    for (i,j) in assignment:
+        real_j = math.floor(j/cluster_size)
+        real_assignment.append((i,real_j))
+    finalcost = {}
+    for (i,j) in real_assignment:
+        finalcost[i] = cost[i][j]
+    return real_assignment, finalcost
+
+def Eval(val):
+    cost = 0
+    for i in val:
+        cost+= val[i]
+    return cost
+
+## Warning : only for 2d for now
+def FindMove(assignment, center, A, C, cost, highconstant = 100.0):
+    c_x = C[center][0]
+    c_y = C[center][1]
+    cluster = [j for (j,i) in assignment if i == center]
+
+    vector = [0,0]
+    for j in cluster:
+        if cost[j][center] == 0 : continue
+        j_x = A[j][0]
+        j_y = A[j][1]
+        vect_x = j_x - c_x
+        vect_y = j_y - c_y
+        norm_vect = math.sqrt(vect_x * vect_x  + vect_y * vect_y)
+        if norm_vect > 0:
+            vector[0] += float(vect_x)/float(norm_vect)
+            vector[1] += float(vect_y)/float(norm_vect)
+    vector[0] /= highconstant
+    vector[1] /= highconstant
+    return vector 
+
+## Warning : only for 2d for now
+def Algorithm(A,C, NBiterations=100):
+    vor_regions = EuclidVoronoi(C)
+    cost = EuclidCost(A, vor_regions)
+    assignment, val = FindAssignment(len(C), cost)
+    rr = 0
+    init_val = Eval(val)
+    for i in range(NBiterations):
+        vector = FindMove(assignment, rr, A, C, cost)
+        C[rr][0] += vector[0]
+        C[rr][1] += vector[1]
+        vor_regions = EuclidVoronoi(C)
+        old_val = Eval(val)
+        cost = EuclidCost(A, vor_regions)
+        assignment, val = FindAssignment(len(C), cost)
+        if i%13 == 0:
+            print("Iteration", i, "| moved center ", rr, "at",
+                  C[rr][0] -vector [0], C[rr][1] -vector[1],
+                  "to", C[rr][0], C[rr][1])
+            print("Old val", old_val, "New val", Eval(val))
+        rr = (rr + 1) % len(C)
+        if Eval(val) == 0 : break
+
+    print("Init Val", init_val, "Final Val", Eval(val))
+    return C, assignment
+    
+def PlotAll(C, A, assignment):
+    import matplotlib.pyplot as plt
+    import scipy.spatial as sp
+    diagram = sp.Voronoi(C)
+    sp.voronoi_plot_2d(diagram)
+    colors = ['b', 'g', 'r', 'c',
+              'm', 'y', 'k']
+    for i in range(len(C)):
+        plt.plot(C[i][0],C[i][1], 'd'+colors[i])
+    for j in range(len(A)):
+        plt.plot(A[j][0],A[j][1], 'x'+colors[assignment[j]])
+    axes = plt.gca()
+    axes.set_xlim([-3,7])
+    axes.set_ylim([-3,7])
+    plt.show()
+    
+
+def EuclidExample(ncenters, npoints, ndim =2):
+    vec_points = np.random.randn(ndim, npoints)
+    vec_centers = np.random.randn(ndim, ncenters)
+
+    ### random set of points/centers
+    coord_points = np.array([[vec_points[0][i],vec_points[1][i]]
+                             for i in range(len(vec_points[0]))])
+
+    coord_centers = np.array([[vec_centers[0][i],vec_centers[1][i]]
+                              for i in range(len(vec_centers[0]))])
+    ### more complicated example
+    # coord_centers = np.array([[0,0],[0.01,0], [0,0.01],[0.01,0.01],
+    #                           [0.005,0.005]])    
+    # vor_regions = EuclidVoronoi(coord_centers)
+    # cost = EuclidCost(coord_points, vor_regions)
+    # assignment, val = FindAssignment(len(coord_centers), cost)
+
+    ### Easy example
+    # coord_centers = np.array([[0,0],[1,0],[0,1],[1,1]])
+    # coord_points = np.array([[0.1,0.1],[0.2,0.2],[0.3,0,3],[0.9,0.1],[0.9,0.2],[0.9,0.3],[0.9,0.9],[0.9,1],[1,0.9],
+    #                         [0.1,0.9],[0.1,0.8],[0.1,1]])
+    
+    A= coord_points
+    C, assign_pairs = Algorithm(coord_points,coord_centers,NBiterations=400)
+    assignment={}
+    for i,x in assign_pairs:
+        assignment[i] = x
+    minCx = 10
+    minCy = 10
+    for i in range(len(C)):
+        minCx=min(minCx, C[i][0])
+        minCy=min(minCy, C[i][1])
+    Cprime=[]
+    for i in range(len(C)):
+        Cprime.append([C[i][0]+abs(minCx), C[i][1]+abs(minCy)])
+    Aprime = []
+    for i in range(len(A)):
+        Aprime.append([A[i][0]+abs(minCx), A[i][1]+abs(minCy)])
+
+    PlotAll(Cprime,Aprime, assignment)
+    
+EuclidExample(5,40)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############################  GRAPH VERSION ##############################
+############################################################################
+############################################################################
+############################################################################
+## Compute a Voronoi diagram of a set of points P in a general metric space G
+## (i.e.: weighted graph)
+##
+## Return : the partition of the vertices of G into Voronoi cells, a map from
+## each vertex to its Voronoi cell, the boundary vertices 
+######
+def Voronoi(G, P):
+    import heapq as hq
+    # voronoi_parts = {p:[] for p in P}
+    voronoi_cells = {v:-1 for v in G}
+    vertices = [(0,p,p) for p in P] # dist, id vertex, voronoi cell
+    seen = [p for p in P]
+    
+    while vertices:
+        (dist, v, cell) = hq.heappop(vertices)
+        if v in seen: continue
+        seen.append(v)
+        # voronoi_parts[cell].append(v)
+        voronoi_cells[v] = cell
+        for u in G[v]:
+            if u not in seen:
+                hq.heappush(vertices, (dist+G[v][u]['weight'], u, cell))
+
+    voronoi_boundaries = {p:[] for p in P}
+    for u in G:
+        for v in G[u]:
+            if voronoi_cells[v] != voronoi_cells[u]:
+                voronoi_boundaries[voronoi_cells[u]].append(u)
+                break
+    return voronoi_boundaries,voronoi_cells
+
+
+######
+## Compute the cost of assigning vertex v to Voronoi cell V
+#####
+def GetAssignmentCost(G, voronoi_boundaries, voronoi_cells):
+    cost = {}
+    for v in G:
+        cost[v] = {}
+        for p in voronoi_boundaries:
+            mincost_p = min([G[v][u]['weight'] for u in voronoi_boundaries[p]])
+            cost[v][p] = mincost_p
+    return cost
+
+
+
+
+
+    
+    
+
