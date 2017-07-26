@@ -80,22 +80,24 @@ def Eval(val):
     return cost
 
 ## Warning : only for 2d for now
-def FindMove(assignment, center, A, C, cost, highconstant = 100.0):
+def FindMove(assignment, center, A, C, cost,
+             bounded_regions, highconstant = 100.0):
     c_x = C[center][0]
     c_y = C[center][1]
     cluster = [j for (j,i) in assignment if i == center]
 
     vector = [0,0]
     for j in cluster:
-        if cost[j][center] == 0 : continue
+        w_j = MoveWeights(A[j], center, bounded_regions)
+        # if cost[j][center] == 0 : continue
         j_x = A[j][0]
         j_y = A[j][1]
         vect_x = j_x - c_x
         vect_y = j_y - c_y
         norm_vect = math.sqrt(vect_x * vect_x  + vect_y * vect_y)
         if norm_vect > 0:
-            vector[0] += float(vect_x)/float(norm_vect)
-            vector[1] += float(vect_y)/float(norm_vect)
+            vector[0] += math.exp(w_j) * float(vect_x)/float(norm_vect)
+            vector[1] += math.exp(w_j) * float(vect_y)/float(norm_vect)
     vector[0] /= highconstant
     vector[1] /= highconstant
     return vector 
@@ -108,7 +110,7 @@ def Algorithm(A,C, NBiterations=100):
     rr = 0
     init_val = Eval(val)
     for i in range(NBiterations):
-        vector = FindMove(assignment, rr, A, C, cost)
+        vector = FindMove(assignment, rr, A, C, cost, vor_regions)
         C[rr][0] += vector[0]
         C[rr][1] += vector[1]
         vor_regions = EuclidVoronoi(C)
@@ -141,8 +143,23 @@ def PlotAll(C, A, assignment):
     axes.set_xlim([-3,7])
     axes.set_ylim([-3,7])
     plt.show()
-    
 
+### Warning for 2d only    
+def MoveWeights(a, c, bounded_regions):
+    from shapely.geometry import Point
+    from shapely.geometry.polygon import Polygon
+    pa = Point(a[0],a[1])
+    R_c = Polygon(bounded_regions[c])
+    if pa.distance(R_c) > 0:
+        return pa.distance(R_c)
+    else:
+        min_dist = 100
+        for i in range(len(bounded_regions)):
+            if i == c : continue
+            R = Polygon(bounded_regions[i])
+            min_dist = min(min_dist, pa.distance(R))
+    return -min_dist
+    
 def EuclidExample(ncenters, npoints, ndim =2):
     vec_points = np.random.randn(ndim, npoints)
     vec_centers = np.random.randn(ndim, ncenters)
