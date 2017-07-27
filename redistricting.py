@@ -1,40 +1,31 @@
 import numpy as np
 import math
 
+def find_bounding_box(S):
+    return ([f(p[i] for p in S) for i in [0,1]] for f in [min, max])
+
+def find_extent(bbox):
+    minpt, maxpt = bbox
+    return [maxpt[i] - minpt[i] for i in range(2)]
+
 ### WARNING : this is for 2d for now!
 def EuclidVoronoi(C):
+    def unbounded(input_region): return any(x==-1 for x in input_region)
     import scipy.spatial as sp
     ## insert points to remove
     ## infinite regions
-    boundary = np.array([[-20,-20],[20,-20],[-20,20],[20,20]])
-    
+    minpt, maxpt = find_bounding_box(C)
+    extent = find_extent([minpt,maxpt])
+    smallpt, bigpt = [minpt[i]-extent[i] for i in range(2)], [maxpt[i]+extent[i] for i in range(2)]
+    boundary = np.array([smallpt, [bigpt[0],smallpt[1]],[smallpt[0],bigpt[1]],bigpt])
     diagram = sp.Voronoi(np.concatenate((C,boundary)))
-    bounded_regions = []
-    for i in range(len(diagram.regions)):
-        region = []
-        bounded_R = True
-        if diagram.regions[i] == [] : continue
-        for j in diagram.regions[i]:
-            if j == -1 :
-                bounded_R = False
-                break ## region is infinite, can be discarded
-            region.append(diagram.vertices[j])
-        if bounded_R:
-            bounded_regions.append(region)
+    bounded_regions = [[diagram.vertices[j] for j in region] for region in diagram.regions if region != [] and not unbounded(region)]
     return OrderRegions(C,bounded_regions)
 
 def OrderRegions(C, bounded_regions):
     from shapely.geometry import Point
     from shapely.geometry.polygon import Polygon
-    ordered = []
-    for i in range(len(C)):
-        p = Point(C[i][0],C[i][1])
-        for i in range(len(bounded_regions)):
-            R = Polygon(bounded_regions[i])
-            if p.distance(R) == 0:
-                ordered.append(bounded_regions[i])
-                break
-    return ordered
+    return [[r for r in bounded_regions if Point(p[0],p[1]).distance(Polygon(r))==0][0] for p in C]
 
 ### WARNING : this is for 2d for now!
 def EuclidCost(A, bounded_regions):
@@ -53,14 +44,7 @@ def EuclidCost(A, bounded_regions):
 def FindAssignment(nb_cells, cost):
     import munkres as mk
     cluster_size = int(len(cost)/nb_cells)
-    assign_mat = []
-    for v in range(len(cost)):
-        v_assign = []
-        for p in cost[v]:
-            for i in range(cluster_size):
-                v_assign.append(cost[v][p])
-        assign_mat.append(v_assign)
-    matrix = assign_mat
+    matrix = [sum([cluster_size*[c] for p,c in cost[v].items()],[]) for v in cost]
     # print(cost[0], assign_mat)
     m = mk.Munkres()
     assignment = m.compute(matrix)
@@ -81,7 +65,7 @@ def Eval(val):
 
 ## Warning : only for 2d for now
 def FindMove(assignment, center, A, C, cost,
-             bounded_regions, highconstant = 100.0):
+             bounded_regions, diameter, highconstant = 100.0):
     c_x = C[center][0]
     c_y = C[center][1]
     cluster = [j for (j,i) in assignment if i == center]
@@ -89,28 +73,29 @@ def FindMove(assignment, center, A, C, cost,
     vector = [0,0]
     for j in cluster:
         w_j = MoveWeights(A[j], center, bounded_regions)
-        # if cost[j][center] == 0 : continue
+        if cost[j][center] == 0 : continue
         j_x = A[j][0]
         j_y = A[j][1]
         vect_x = j_x - c_x
         vect_y = j_y - c_y
         norm_vect = math.sqrt(vect_x * vect_x  + vect_y * vect_y)
         if norm_vect > 0:
-            vector[0] += math.exp(w_j) * float(vect_x)/float(norm_vect)
-            vector[1] += math.exp(w_j) * float(vect_y)/float(norm_vect)
-    vector[0] /= highconstant
-    vector[1] /= highconstant
+            vector[0] += math.exp(w_j/diameter) * float(vect_x)/float(norm_vect)
+            vector[1] += math.exp(w_j/diameter) * float(vect_y)/float(norm_vect)
+    vector[0] /= 100 #len(cluster)
+    vector[1] /= 100 #len(cluster)
     return vector 
 
 ## Warning : only for 2d for now
 def Algorithm(A,C, NBiterations=100):
+    extent = find_extent(find_bounding_box(A))
     vor_regions = EuclidVoronoi(C)
     cost = EuclidCost(A, vor_regions)
     assignment, val = FindAssignment(len(C), cost)
     rr = 0
     init_val = Eval(val)
     for i in range(NBiterations):
-        vector = FindMove(assignment, rr, A, C, cost, vor_regions)
+        vector = FindMove(assignment, rr, A, C, cost, vor_regions, max(extent))
         C[rr][0] += vector[0]
         C[rr][1] += vector[1]
         vor_regions = EuclidVoronoi(C)
@@ -183,7 +168,7 @@ def EuclidExample(ncenters, npoints, ndim =2):
     #                         [0.1,0.9],[0.1,0.8],[0.1,1]])
     
     A= coord_points
-    C, assign_pairs = Algorithm(coord_points,coord_centers,NBiterations=400)
+    C, assign_pairs = Algorithm(coord_points,coord_centers,NBiterations=1000)
     assignment={}
     for i,x in assign_pairs:
         assignment[i] = x
