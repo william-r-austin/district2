@@ -3,19 +3,19 @@ import math
 from copy import copy
 
 def find_bounding_box(S):
-    return ([f(p[i] for p in S) for i in [0,1]] for f in [min, max])
+    return [[f(p[i] for p in S) for i in [0,1]] for f in [min, max]]
 
 def find_extent(bbox):
     minpt, maxpt = bbox
     return [maxpt[i] - minpt[i] for i in range(2)]
 
 ### WARNING : this is for 2d for now!
-def EuclidVoronoi(C):
+def EuclidVoronoi(C,bbox):
     def unbounded(input_region): return any(x==-1 for x in input_region)
     import scipy.spatial as sp
     ## insert points to remove
     ## infinite regions
-    minpt, maxpt = find_bounding_box(C)
+    minpt, maxpt = bbox
     extent = find_extent([minpt,maxpt])
     smallpt, bigpt = [minpt[i]-extent[i] for i in range(2)], [maxpt[i]+extent[i] for i in range(2)]
     boundary = np.array([smallpt, [bigpt[0],smallpt[1]],[smallpt[0],bigpt[1]],bigpt])
@@ -73,7 +73,7 @@ def FindMove(assignment, center, A, C, cost,
 
     vector = [0,0]
     for j in cluster:
-        w_j = MoveWeights(A[j], center, bounded_regions,20)
+        w_j = MoveWeights(A[j], center, bounded_regions,len(cluster))
         #if cost[j][center] == 0 : continue
         j_x = A[j][0]
         j_y = A[j][1]
@@ -89,8 +89,9 @@ def FindMove(assignment, center, A, C, cost,
 
 ## Warning : only for 2d for now
 def Algorithm(A,C, NBiterations=100):
-    extent = find_extent(find_bounding_box(A))
-    vor_regions = EuclidVoronoi(C)
+    bbox = find_bounding_box(A)
+    extent = find_extent(bbox)
+    vor_regions = EuclidVoronoi(C,bbox)
     cost = EuclidCost(A, vor_regions)
     assignment, val = FindAssignment(len(C), cost)
     rr = 0
@@ -99,27 +100,26 @@ def Algorithm(A,C, NBiterations=100):
         vector = FindMove(assignment, rr, A, C, cost, vor_regions, max(extent))
         C[rr][0] += vector[0]
         C[rr][1] += vector[1]
-        vor_regions = EuclidVoronoi(C)
+        vor_regions = EuclidVoronoi(C,bbox)
         old_val = Eval(val)
         cost = EuclidCost(A, vor_regions)
         assignment, val = FindAssignment(len(C), cost)
-        if i%13 == 0:
+        if i%130 == 0:
             print("Iteration", i, "| moved center ", rr, "at",
                   C[rr][0] -vector [0], C[rr][1] -vector[1],
                   "to", C[rr][0], C[rr][1])
-            print("Old val", old_val, "New val", Eval(val))
-        if old_val < .052:
-            print(repr(C))
-            break
+            print("Old val", old_val, "New val", Eval(val), " val ", [(i,c) for i,c in val.items() if c >.0001])
+            PlotAll(C, A, assignment)
         rr = (rr + 1) % len(C)
         if Eval(val) == 0 : break
 
     print("Init Val", init_val, "Final Val", Eval(val))
     return C, assignment
     
-def PlotAll(C, A, assignment):
+def PlotAll(C, A, assign_pairs):
     import matplotlib.pyplot as plt
     import scipy.spatial as sp
+    assignment=dict(assign_pairs)
     diagram = sp.Voronoi(C)
     sp.voronoi_plot_2d(diagram)
     colors = ['b', 'g', 'r', 'c',
@@ -131,7 +131,7 @@ def PlotAll(C, A, assignment):
     axes = plt.gca()
     axes.set_xlim([-3,7])
     axes.set_ylim([-3,7])
-    plt.show()
+    plt.show(block=False)
 
 ### Warning for 2d only    
 def MoveWeights(a, c, bounded_regions, k):
@@ -213,10 +213,7 @@ def createEuclidExample(ncenters, npoints, ndim=2):
 
 def runExample(coord_points, coord_centers):
     A = coord_points
-    C, assign_pairs = Algorithm(coord_points,copy(coord_centers),NBiterations=1000)
-    assignment={}
-    for i,x in assign_pairs:
-        assignment[i] = x
+    C, assign_pairs = Algorithm(coord_points,copy(coord_centers),5000)
     minCx = 10
     minCy = 10
     for i in range(len(C)):
@@ -229,7 +226,7 @@ def runExample(coord_points, coord_centers):
     for i in range(len(A)):
         Aprime.append([A[i][0]+abs(minCx), A[i][1]+abs(minCy)])
 
-    PlotAll(Cprime,Aprime, assignment)
+    PlotAll(Cprime,Aprime, assign_pairs)
     
 #EuclidExample(5,40)
 
