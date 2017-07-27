@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from copy import copy
 
 def find_bounding_box(S):
     return ([f(p[i] for p in S) for i in [0,1]] for f in [min, max])
@@ -72,18 +73,18 @@ def FindMove(assignment, center, A, C, cost,
 
     vector = [0,0]
     for j in cluster:
-        w_j = MoveWeights(A[j], center, bounded_regions)
-        if cost[j][center] == 0 : continue
+        w_j = MoveWeights(A[j], center, bounded_regions,20)
+        #if cost[j][center] == 0 : continue
         j_x = A[j][0]
         j_y = A[j][1]
         vect_x = j_x - c_x
         vect_y = j_y - c_y
         norm_vect = math.sqrt(vect_x * vect_x  + vect_y * vect_y)
         if norm_vect > 0:
-            vector[0] += math.exp(w_j/diameter) * float(vect_x)/float(norm_vect)
-            vector[1] += math.exp(w_j/diameter) * float(vect_y)/float(norm_vect)
-    vector[0] /= 100 #len(cluster)
-    vector[1] /= 100 #len(cluster)
+            vector[0] += w_j * float(vect_x)/float(norm_vect)
+            vector[1] += w_j * float(vect_y)/float(norm_vect)
+    vector[0] /= highconstant
+    vector[1] /= highconstant
     return vector 
 
 ## Warning : only for 2d for now
@@ -107,6 +108,9 @@ def Algorithm(A,C, NBiterations=100):
                   C[rr][0] -vector [0], C[rr][1] -vector[1],
                   "to", C[rr][0], C[rr][1])
             print("Old val", old_val, "New val", Eval(val))
+        if old_val < .052:
+            print(repr(C))
+            break
         rr = (rr + 1) % len(C)
         if Eval(val) == 0 : break
 
@@ -130,19 +134,16 @@ def PlotAll(C, A, assignment):
     plt.show()
 
 ### Warning for 2d only    
-def MoveWeights(a, c, bounded_regions):
+def MoveWeights(a, c, bounded_regions, k):
     from shapely.geometry import Point
     from shapely.geometry.polygon import Polygon
     pa = Point(a[0],a[1])
     R_c = Polygon(bounded_regions[c])
     if pa.distance(R_c) > 0:
-        return pa.distance(R_c)
+        return 1 #pa.distance(R_c)
     else:
-        min_dist = 100
-        for i in range(len(bounded_regions)):
-            if i == c : continue
-            R = Polygon(bounded_regions[i])
-            min_dist = min(min_dist, pa.distance(R))
+        return 1/k
+        min_dist = min(pa.distance(Polygon(bounded_regions[i])) for i in range(len(bounded_regions)) if i != c)
     return -min_dist
     
 def EuclidExample(ncenters, npoints, ndim =2):
@@ -186,7 +187,51 @@ def EuclidExample(ncenters, npoints, ndim =2):
 
     PlotAll(Cprime,Aprime, assignment)
     
-EuclidExample(5,40)
+def createEuclidExample(ncenters, npoints, ndim=2):
+    vec_points = np.random.randn(ndim, npoints)
+    vec_centers = np.random.randn(ndim, ncenters)
+
+    ### random set of points/centers
+    coord_points = np.array([[vec_points[0][i],vec_points[1][i]]
+                             for i in range(len(vec_points[0]))])
+
+    coord_centers = np.array([[vec_centers[0][i],vec_centers[1][i]]
+                              for i in range(len(vec_centers[0]))])
+    ### more complicated example
+    # coord_centers = np.array([[0,0],[0.01,0], [0,0.01],[0.01,0.01],
+    #                           [0.005,0.005]])    
+    # vor_regions = EuclidVoronoi(coord_centers)
+    # cost = EuclidCost(coord_points, vor_regions)
+    # assignment, val = FindAssignment(len(coord_centers), cost)
+
+    ### Easy example
+    # coord_centers = np.array([[0,0],[1,0],[0,1],[1,1]])
+    # coord_points = np.array([[0.1,0.1],[0.2,0.2],[0.3,0,3],[0.9,0.1],[0.9,0.2],[0.9,0.3],[0.9,0.9],[0.9,1],[1,0.9],
+    #                         [0.1,0.9],[0.1,0.8],[0.1,1]])
+    
+    return coord_points, coord_centers
+
+def runExample(coord_points, coord_centers):
+    A = coord_points
+    C, assign_pairs = Algorithm(coord_points,copy(coord_centers),NBiterations=1000)
+    assignment={}
+    for i,x in assign_pairs:
+        assignment[i] = x
+    minCx = 10
+    minCy = 10
+    for i in range(len(C)):
+        minCx=min(minCx, C[i][0])
+        minCy=min(minCy, C[i][1])
+    Cprime=[]
+    for i in range(len(C)):
+        Cprime.append([C[i][0]+abs(minCx), C[i][1]+abs(minCy)])
+    Aprime = []
+    for i in range(len(A)):
+        Aprime.append([A[i][0]+abs(minCx), A[i][1]+abs(minCy)])
+
+    PlotAll(Cprime,Aprime, assignment)
+    
+#EuclidExample(5,40)
 
 
 
