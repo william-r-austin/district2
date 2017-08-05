@@ -2,6 +2,13 @@ import numpy as np
 import math
 from copy import copy
 
+import matplotlib.pyplot as plt
+import scipy.spatial as sp
+from matplotlib import colors as mcolors
+color_dict = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+colors = [x for x in color_dict if x not in {"w",'aliceblue','antiquewhite','azure','beige','bisque','blanchedalmond'}]
+
+
 def find_bounding_box(S):
     return [[f(p[i] for p in S) for i in [0,1]] for f in [min, max]]
 
@@ -12,7 +19,6 @@ def find_extent(bbox):
 ### WARNING : this is for 2d for now!
 def EuclidVoronoi(C,bbox):
     def unbounded(input_region): return any(x==-1 for x in input_region)
-    import scipy.spatial as sp
     ## insert points to remove
     ## infinite regions
     minpt, maxpt = bbox
@@ -66,7 +72,7 @@ def Eval(val):
 
 ## Warning : only for 2d for now
 def FindMove(assignment, center, A, C, cost,
-             bounded_regions, diameter, highconstant = 100.0):
+             bounded_regions, diameter, highconstant = 2000.0):
     c_x = C[center][0]
     c_y = C[center][1]
     cluster = [j for (j,i) in assignment if i == center]
@@ -108,7 +114,7 @@ def Algorithm(A,C, NBiterations=100):
             print("Iteration", i, "| moved center ", rr, "at",
                   C[rr][0] -vector [0], C[rr][1] -vector[1],
                   "to", C[rr][0], C[rr][1])
-            print("Old val", old_val, "New val", Eval(val), " val ", [(i,c) for i,c in val.items() if c >.0001])
+            print("Old val", old_val, "New val", Eval(val))
             PlotAll(C, A, assignment)
         rr = (rr + 1) % len(C)
         if Eval(val) == 0 : break
@@ -117,17 +123,13 @@ def Algorithm(A,C, NBiterations=100):
     return C, assignment
     
 def PlotAll(C, A, assign_pairs):
-    import matplotlib.pyplot as plt
-    import scipy.spatial as sp
     assignment=dict(assign_pairs)
     diagram = sp.Voronoi(C)
     sp.voronoi_plot_2d(diagram)
-    colors = ['b', 'g', 'r', 'c',
-              'm', 'y', 'k']
     for i in range(len(C)):
-        plt.plot(C[i][0],C[i][1], 'd'+colors[i])
+        plt.plot(C[i][0],C[i][1], 'd', color = colors[i])
     for j in range(len(A)):
-        plt.plot(A[j][0],A[j][1], 'x'+colors[assignment[j]])
+        plt.plot(A[j][0],A[j][1], 'x', color = colors[assignment[j]])
     axes = plt.gca()
     axes.set_xlim([-3,7])
     axes.set_ylim([-3,7])
@@ -146,7 +148,7 @@ def MoveWeights(a, c, bounded_regions, k):
         min_dist = min(pa.distance(Polygon(bounded_regions[i])) for i in range(len(bounded_regions)) if i != c)
     return -min_dist
     
-def EuclidExample(ncenters, npoints, ndim =2):
+def EuclidExample(ncenters, npoints, iters, ndim =2):
     vec_points = np.random.randn(ndim, npoints)
     vec_centers = np.random.randn(ndim, ncenters)
 
@@ -169,7 +171,7 @@ def EuclidExample(ncenters, npoints, ndim =2):
     #                         [0.1,0.9],[0.1,0.8],[0.1,1]])
     
     A= coord_points
-    C, assign_pairs = Algorithm(coord_points,coord_centers,NBiterations=1000)
+    C, assign_pairs = Algorithm(coord_points,coord_centers,NBiterations=iters)
     assignment={}
     for i,x in assign_pairs:
         assignment[i] = x
@@ -211,9 +213,10 @@ def createEuclidExample(ncenters, npoints, ndim=2):
     
     return coord_points, coord_centers
 
-def runExample(coord_points, coord_centers):
+def runExample(coord_points, coord_centers, iter):
     A = coord_points
-    C, assign_pairs = Algorithm(coord_points,copy(coord_centers),5000)
+    C, assign_pairs = Algorithm(coord_points,copy(coord_centers),iter)
+    print("centers: ", repr(C))
     minCx = 10
     minCy = 10
     for i in range(len(C)):
