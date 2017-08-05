@@ -1916,7 +1916,7 @@ int main (int argc, char **argv)
   
   long costs[][3] = {{2,2,1},{2,2,1},{3,2,1},{1,2,2},{1,2,2},{1,1,2}};
   //long costs[][2] = {{2,4},{4,5}};
-  long populations[] = {1,1,1,1,1,1};
+  long populations[] = {2,1,4,1,1,2};
   //long populations[] = {1,1};
   long num_clients = 6;
   //long num_clients = 2;
