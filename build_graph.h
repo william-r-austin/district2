@@ -23,7 +23,7 @@ graph build_graph(long* costs, long* populations, long num_clients, long num_cen
     G.n = num_clients + num_centers;
     G.m = num_clients * num_centers;
     G.nodes = (node *) calloc(G.n+2, sizeof(node));
-    G.arcs = (arc *) calloc(G.m+1, sizeof(arc));
+    G.arcs = (arc *) calloc(2*G.m+1, sizeof(arc));
     long * cap = (long*) calloc ( 2*G.m, sizeof(long) ); 
 
     //set up nodes corresponding to centers
@@ -32,6 +32,7 @@ graph build_graph(long* costs, long* populations, long num_clients, long num_cen
       G.nodes[center_index].excess = - (capacity + (j < remainder? 1 : 0));
       G.nodes[center_index].first = G.arcs + G.m + j*num_clients;
     }
+    int c = 0;
     for (long i=0; i < num_clients; ++i){
       G.nodes[i].excess = populations[i];
       G.nodes[i].first = G.arcs + i*num_centers;
