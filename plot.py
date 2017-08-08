@@ -19,7 +19,6 @@ def Parse(filename):
     C = []
     for i in range(1, nb_centers+1):
         s = lines[i].split()
-        print(s)
         x = float(s[0])
         y = float(s[1])
         C.append([x,y])
