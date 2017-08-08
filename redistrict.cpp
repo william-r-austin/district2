@@ -2,6 +2,7 @@
 #include <limits>
 #include "initial_centers.hpp"
 #include "mincostflow.hpp"
+#include "redistrict.hpp"
 /* 
  Assign initial center locations.
  Repeat: 
@@ -11,9 +12,8 @@
 
 using namespace std;
 
-#include "redistrict.hpp"
-
-vector<Point> choose_centers(vector<Point> clients, long * populations, int num_centers){
+// 
+pair<vector<Point>, vector<int>> choose_centers(vector<Point> clients, long * populations, int num_centers){
   long population = accumulate(populations, populations+clients.size(), 0);
   double population_per_center = population/num_centers;
   long * costs = (long *) calloc(clients.size() * num_centers, sizeof(long));
@@ -37,7 +37,7 @@ vector<Point> choose_centers(vector<Point> clients, long * populations, int num_
     for (int i = 0; i < clients.size(); ++i){
       for (int j = 0; j < centers.size(); ++j){
 	costs[i*num_centers+j] = (long) ((distances_sq[i*num_centers+j]/max_dist_sq) * 10000/*INT_MAX*/)/(num_centers*num_centers);
-	//	std::cout << "at client " << i << " and center " << j << ", distance is " << distances_sq[i*num_centers+j] << ", fraction distance is " <<  distances_sq[i*num_centers+j]/max_dist_sq << ", cost is " << costs[i*num_centers+j] << "\n";
+	//	std::cerr << "at client " << i << " and center " << j << ", distance is " << distances_sq[i*num_centers+j] << ", fraction distance is " <<  distances_sq[i*num_centers+j]/max_dist_sq << ", cost is " << costs[i*num_centers+j] << "\n";
       }
     }
     //find assignment of clients to centers
@@ -63,10 +63,10 @@ vector<Point> choose_centers(vector<Point> clients, long * populations, int num_
       sum_of_dist_sq += d;
       if (d > max_dist_sq_assigned) max_dist_sq_assigned = d;
     }
-    std::cout << "sum of dist sq: " << sum_of_dist_sq << " max: " << max_dist_sq_assigned << "\n";
+    std::cerr << "sum of dist sq: " << sum_of_dist_sq << " max: " << max_dist_sq_assigned << "\n";
   }
   while (different);
-  return centers;
+  return make_pair(centers, assignment);
 }
     
       
