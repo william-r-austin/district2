@@ -28,10 +28,30 @@ rand_float.o: rand_float.cpp rand_float.hpp
 point.o: point.cpp point.hpp
 	$(CCOMP) $(CFLAGS) -c point.cpp
 
+rand_point.o: rand_point.cpp rand_point.hpp
+	$(CCOMP) $(CFLAGS) -c rand_point.cpp
+
+#distances.o : distances.cpp distances.hpp
+#	$(CCOMP) $(CFLAGS) -c distances.cpp
+
 initial_centers.o: initial_centers.cpp initial_centers.hpp point.hpp rand_float.hpp
 	$(CCOMP) $(CFLAGS) -c initial_centers.cpp
 
 test_initial_centers.o: test_initial_centers.cpp initial_centers.hpp point.hpp rand_float.hpp
+	$(CCOMP) $(CFLAGS) -c test_initial_centers.cpp
 
 test_initial_centers: test_initial_centers.o initial_centers.o point.o
 	$(CCOMP) $(CFLAGS) test_initial_centers.o initial_centers.o point.o -o test_initial_centers
+
+mincostflow.o: mincostflow.cpp mincostflow.hpp build_graph.h types_cs2.h
+	$(CCOMP) $(CFLAGS) -c mincostflow.cpp
+
+redistrict.o: redistrict.cpp redistrict.hpp point.hpp
+	$(CCOMP) $(CFLAGS) -c redistrict.cpp
+
+test_redistrict.o: test_redistrict.cpp redistrict.hpp
+	$(CCOMP) $(CFLAGS) -c test_redistrict.cpp
+
+test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o point.o rand_point.o rand_float.o
+	$(CCOMP) $(CFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o rand_point.o point.o rand_float.o -o test_redistrict
+

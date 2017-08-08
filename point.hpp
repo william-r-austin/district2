@@ -10,9 +10,19 @@ public:
   double dist_sq(Point other){
     return (x-other.x)*(x-other.x)+(y-other.y)*(y-other.y);
   }
+  Point scale(double alpha){
+    return Point(alpha*x,alpha*y);
+  }
+  Point add(Point other){
+    return Point(x+other.x,y+other.y);
+  }
+  bool operator==(const Point &other){
+    return x == other.x && y == other.y;
+  }
+  bool operator!=(const Point &other){
+    return x != other.x || y != other.y;
+  }
   Point() : x(0), y(0) {}
 };
-
-Point rand_point();
 
 std::ostream &operator<<(std::ostream & output, const Point &p);

@@ -1,12 +1,9 @@
-#include <iostream>
 /* min-cost flow */
 /* successive approximation algorithm */
 /* Copyright C IG Systems, igsys@eclipse.com */
 /* any use except for evaluation purposes requires a licence */
 
 /************************************** constants  &  parameters ********/
-//PK:
-#define PRINT_ANS 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,8 +16,8 @@
 
 /* definitions of types: node & arc */
 
-#include "types_cs2.h"
 #include "build_graph.h"
+#include "mincostflow.hpp"
 
 /* function 'timer()' for measuring processor time */
 
@@ -83,7 +80,6 @@
 
 #define INCREASE_FLOW( i, j, a, df )\
 {\
-std::cout <<"pushing " << df << " units of flow from " << i-nodes << " to " << j-nodes << "\n"; \
    (i) -> excess            -= df;\
    (j) -> excess            += df;\
    (a)            -> r_cap  -= df;\
@@ -328,21 +324,6 @@ node  d_node,                /* dummy node - for technical reasons */
 long long int *node_balance;
 #endif
 
-void print_state(){
-  for (int n = 0; n < 5; ++ n){
-    printf("first %i, current %i, suspended %i, excess %i, price %i, q_next %i, b_next %i\n",
-	    (nodes[n].first == 0 ? -1 : (int)(nodes[n].first - arcs)),
-	    (int)(nodes[n].current == 0 ? -1 : (int)(nodes[n].current - arcs)), 
-	    (nodes[n].suspended == 0 ? -1 : (int)(nodes[n].suspended - arcs)),
-	    (int)(nodes[n].excess),
-	    (int)(nodes[n].price),
-	    (nodes[n].q_next == 0 ? -1 : (int)(nodes[n].q_next - nodes)),
-	    (nodes[n].b_next == 0 ? -1 : (int)(nodes[n].b_next - nodes)),
-	    (nodes[n].b_prev == 0 ? -1 : (int)(nodes[n].b_prev - nodes)));
-  }
-}
-	    
-
 
 /************************************************ abnormal finish **********/
 
@@ -371,7 +352,7 @@ arc    *a;          /* current arc */
 arc    *a_stop;
 long   df;
 bucket *b;          /* current bucket */
- printf("max_c %i\n", (int)max_c);
+
 n             = n_p;
 nodes         = nodes_p;
 sentinel_node = nodes + n;
@@ -486,9 +467,6 @@ price_t rc,                    /* reduced cost of (j,i) */
 n_scan ++;
 
 i_rank = i -> rank;
-/* PK: i->rank is set to -1 after i is scanned.
-   Before that, i->rank maybe corresponds to l(v) in paper
-*/
 
 FOR_ACTIVE_ARCS_a_FROM_i 
   {
@@ -523,8 +501,7 @@ FOR_ACTIVE_ARCS_a_FROM_i
 		  }
 
 		b_new = buckets + j_new_rank;
-		INSERT_TO_BUCKET ( j, b_new )
-		  std::cout << "inserting " << j-nodes << " into bucket\n";
+		INSERT_TO_BUCKET ( j, b_new )  
 	      }
 	  }
       }
@@ -552,7 +529,7 @@ n_update ++;
 
 FOR_ALL_NODES_i 
   {
-    std::cout << "node " << i - nodes << " excess " << i->excess << "\n";
+
     if ( i -> excess < 0 )
       {
 	INSERT_TO_BUCKET ( i, buckets );
@@ -564,8 +541,6 @@ FOR_ALL_NODES_i
       }
   }
 
- std::cout << "total excess " << total_excess << "\n";
- 
 remain = total_excess;
 if ( remain < 0.5 ) return;
 
@@ -577,7 +552,6 @@ for ( b = buckets; b != l_bucket; b ++ )
     while ( NONEMPTY_BUCKET ( b ) )
        {
 	 GET_FROM_BUCKET ( i, b )
-    std::cout << "node " << i - nodes << " excess " << i->excess << "\n";
 
 	 up_node_scan ( i );
 
@@ -592,9 +566,7 @@ for ( b = buckets; b != l_bucket; b ++ )
     if ( remain <= 0  ) break; 
   } /* end of scanning buckets */
 
- if ( remain > 0.5 ){
-  flag_updt = 1;
- }
+if ( remain > 0.5 ) flag_updt = 1;
 
 /* finishup */
 /* changing prices for nodes which were not scanned during main loop */
@@ -630,7 +602,6 @@ register price_t p_max,    /* current maximal price */
                  i_price,  /* price of node  i */
                  dp;       /* current arc partial residual cost */
 
- printf("epsilon %i\n",(int)epsilon);
 p_max = price_min;
 i_price = i -> price;
 
@@ -735,7 +706,6 @@ register node *j;       /* head of  a  */
 register long df;       /* amoumt of flow to be pushed through  a  */
 excess_t j_exc;             /* former excess of  j  */
 
- print_state();
 n_discharge ++;
 
 a = i -> current;
@@ -743,9 +713,7 @@ j = a -> head;
 
 if ( !ADMISSIBLE ( i, j, a ) ) 
   { 
-    print_state();
     relabel ( i );
-    print_state();
     a = i -> current;
     j = a -> head;
   }
@@ -1726,8 +1694,8 @@ void  cs2 (long n_p, long m_p, node *nodes_p, arc *arcs_p,
   cs_init ( n_p, m_p, nodes_p, arcs_p, f_sc, max_c, cap_p );
   
   /*init_solution ( );*/
-  printf ("c scale-factor: %8.0f     cut-off-factor: %6.1f\nc\n",
-	  f_scale, cut_off_factor );
+  /*PK commented out: printf ("c scale-factor: %8.0f     cut-off-factor: %6.1f\nc\n",
+    f_scale, cut_off_factor );*/
   
   cc = 0;
   update_epsilon ();
@@ -1922,9 +1890,8 @@ void foo() {
   free(cap);
 }
 
-int main (int argc, char **argv)
-
-{
+int find_assignment(long * costs, long * populations, int num_clients, int num_centers, std::vector<int> &assignment){
+  int i = 1/0;
   double t;
   arc *arp;
   node *ndp;
@@ -1937,29 +1904,19 @@ int main (int argc, char **argv)
   long *cap;
   
   
-  f_sc = (long) (( argc > 1 ) ? atoi( argv[1] ): SCALE_DEFAULT);
+  f_sc = (long) SCALE_DEFAULT;
   
-  printf ("c CS 4.6\n");
-  printf ("c Commercial use requires a licence\n");
-  printf ("c contact igsys@eclipse.net\nc\n");
+  /* printf ("c CS 4.6\n"); */
+  /* printf ("c Commercial use requires a licence\n"); */
+  /* printf ("c contact igsys@eclipse.net\nc\n"); */
   
-  //long costs[][3] = {{2,2,1},{2,2,1},{3,2,1},{1,2,2},{1,2,2},{1,1,2}};
-  //long costs[][2] = {{2,4},{4,5}};
-  //long costs[][2] = {{0,2500},{2500,0},{1074,394}};
-  long costs[][2] = {{0,250},{250,0},{100,40}};
-  //long populations[] = {2,1,4,1,1,2};
-  long populations[] = {1,1,1};
-  //long num_clients = 6;
-  long num_clients = 3;
-  //long num_centers = 3;
-  long num_centers = 2;
   long * costs_table = (long *) costs;
   for (long i = 0; i < num_clients; ++i){
     for (long j = 0; j < num_centers; ++j){
       if (costs_table[i*num_centers+j] > c_max) c_max = costs_table[i*num_centers+j];
     }
   }
-  graph G = build_graph((long *)costs, (long *) populations, num_clients, num_centers, &cap);
+  graph G = build_graph(costs, populations, num_clients, num_centers, &cap);
   ndp = G.nodes;
   arp =G.arcs;
   nodes = ndp;
@@ -1978,25 +1935,25 @@ int main (int argc, char **argv)
   
   
   m2 = 2 * m;
-  printf ("c nodes: %15ld     arcs:  %15ld\n", n, m ); 
+  //  printf ("c nodes: %15ld     arcs:  %15ld\n", n, m ); 
   
   t = timer();
   cs2 ( n, m2, ndp, arp, f_sc, c_max, cap, &cost );
   t = timer() - t;
   
   
-  printf ("c time:  %15.2f     cost:  %15.0f\n", t, cost);
+  //  printf ("c time:  %15.2f     cost:  %15.0f\n", t, cost);
   
-  printf ("c refines:    %10ld     discharges: %10ld\n",
-	  n_refine, n_discharge);
-  printf ("c pushes:     %10ld     relabels:   %10ld\n",
-	  n_push, n_relabel);
-  printf ("c updates:    %10ld     u-scans:    %10ld\n",
-	  n_update, n_scan);
-  printf ("c p-refines:  %10ld     r-scans:    %10ld\n",
-	  n_prefine, n_prscan);
-  printf ("c dfs-scans:  %10ld     bad-in:     %4ld  + %2ld\n",
-	  n_prscan1, n_bad_pricein, n_bad_relabel);
+  /* printf ("c refines:    %10ld     discharges: %10ld\n", */
+  /* 	  n_refine, n_discharge); */
+  /* printf ("c pushes:     %10ld     relabels:   %10ld\n", */
+  /* 	  n_push, n_relabel); */
+  /* printf ("c updates:    %10ld     u-scans:    %10ld\n", */
+  /* 	  n_update, n_scan); */
+  /* printf ("c p-refines:  %10ld     r-scans:    %10ld\n", */
+  /* 	  n_prefine, n_prscan); */
+  /* printf ("c dfs-scans:  %10ld     bad-in:     %4ld  + %2ld\n", */
+  /* 	  n_prscan1, n_bad_pricein, n_bad_relabel); */
   
 #ifdef CHECK_SOLUTION
   printf("c checking feasibility...\n"); 
@@ -2012,6 +1969,21 @@ int main (int argc, char **argv)
     printf("ERROR: CS violation\n");
 #endif
   
+  for (int i = 0; i < num_clients; ++i){
+    //assign the client to the center to which the client sends the most flow
+    //(Not sure if that works.)
+    int center;
+    int flow = 0;
+    for (arc* a = G.nodes[i].suspended; a != G.nodes[i+1].suspended; ++a){
+      int a_flow = cap[ N_ARC (a) ] - (a -> r_cap );
+      if (a_flow > flow){
+	flow = a_flow;
+	center = (a -> head - G.nodes) - num_clients;
+      }
+      assignment[i] = center;
+    }
+  }
+
 #ifdef PRINT_ANS
   print_solution(ndp, arp, nmin, &cost);
 #endif
@@ -2024,5 +1996,4 @@ int main (int argc, char **argv)
   free(node_balance);
 #endif
 
- return 0;
 }
