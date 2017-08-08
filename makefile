@@ -11,7 +11,7 @@ CCOMP = g++
 #CCOMP = gcc-4
 #CFLAGS = -O4 -DNDEBUG
 #CFLAGS = -g -DCHECK_SOLUTION -Wall
-CFLAGS = -g -Wall #-fms-extensions #-Wc++11-extensions
+CFLAGS = -g -Wall -std=c++11#-fms-extensions #-Wc++11-extensions
 #CFLAGS = -O4 -DNDEBUG -DNO_ZERO_CYCLES
 BIN=cs2
 
@@ -54,4 +54,18 @@ test_redistrict.o: test_redistrict.cpp redistrict.hpp
 
 test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o point.o rand_point.o rand_float.o
 	$(CCOMP) $(CFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o rand_point.o point.o rand_float.o -o test_redistrict
+
+find_weights.hpp: point.hpp
+
+find_weights.o: find_weights.cpp find_weights.hpp
+	$(CCOMP) $(CFLAGS) -c find_weights.cpp
+
+test_find_weights.o: test_find_weights.cpp find_weights.hpp
+	$(CCOMP) $(CFLAGS) -c test_find_weights.cpp
+
+
+test_find_weights: test_find_weights.o find_weights.o point.o
+	$(CCOMP) $(CFLAGS) test_find_weights.o find_weights.o point.o -o test_find_weights
+
+
 

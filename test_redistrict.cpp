@@ -19,13 +19,13 @@ void print_out(int num_centers, int num_clients,
 
 
 int main(){
-  int num_clients = 100;
+  int num_clients = 20;
   int num_centers = 5;
   vector<Point> clients(num_clients);
   generate(clients.begin(), clients.end(), rand_point);
   long * populations = (long *) calloc(num_clients, sizeof(long));
   fill(populations, populations+num_clients, 1);
-  pair<vector<Point>, vector<int>> p = choose_centers(clients, populations, num_centers);
+  pair<vector<Point>, vector<int> > p = choose_centers(clients, populations, num_centers);
   vector<Point> centers = p.first;
   vector<int> assignment = p.second;
   // vector<Point> centers 
