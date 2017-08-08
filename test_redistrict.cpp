@@ -1,6 +1,9 @@
 #include "redistrict.hpp"
 #include "rand_point.hpp"
 
+#include <algorithm>    // std::generate
+using namespace std;
+
 int main(){
   int num_clients = 100;
   int num_centers = 5;

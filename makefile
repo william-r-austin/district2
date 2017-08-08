@@ -11,7 +11,7 @@ CCOMP = g++
 #CCOMP = gcc-4
 #CFLAGS = -O4 -DNDEBUG
 #CFLAGS = -g -DCHECK_SOLUTION -Wall
-CFLAGS = -g -Wall -Wc++11-extensions
+CFLAGS = -g -Wall #-fms-extensions #-Wc++11-extensions
 #CFLAGS = -O4 -DNDEBUG -DNO_ZERO_CYCLES
 BIN=cs2
 

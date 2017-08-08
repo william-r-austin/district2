@@ -1891,7 +1891,6 @@ void foo() {
 }
 
 int find_assignment(long * costs, long * populations, int num_clients, int num_centers, std::vector<int> &assignment){
-  int i = 1/0;
   double t;
   arc *arp;
   node *ndp;
@@ -1903,19 +1902,18 @@ int find_assignment(long * costs, long * populations, int num_clients, int num_c
   long f_sc;
   long *cap;
   
-  
   f_sc = (long) SCALE_DEFAULT;
   
   /* printf ("c CS 4.6\n"); */
   /* printf ("c Commercial use requires a licence\n"); */
   /* printf ("c contact igsys@eclipse.net\nc\n"); */
-  
   long * costs_table = (long *) costs;
   for (long i = 0; i < num_clients; ++i){
     for (long j = 0; j < num_centers; ++j){
       if (costs_table[i*num_centers+j] > c_max) c_max = costs_table[i*num_centers+j];
     }
   }
+
   graph G = build_graph(costs, populations, num_clients, num_centers, &cap);
   ndp = G.nodes;
   arp =G.arcs;
