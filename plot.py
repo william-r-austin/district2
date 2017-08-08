@@ -26,7 +26,7 @@ def Parse(filename):
     assign_pairs = {}
     A = []
     j = 0
-    for i in range(nb_centers+1, nb_clients+1):
+    for i in range(nb_centers+1, nb_centers+nb_clients+1):
         s = lines[i].split()
         x = float(s[0])
         y = float(s[1])
