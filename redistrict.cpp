@@ -13,7 +13,7 @@
 using namespace std;
 
 // 
-pair<vector<Point>, vector<int>> choose_centers(vector<Point> clients, long * populations, int num_centers){
+pair<vector<Point>, vector<int> > choose_centers(vector<Point> clients, long * populations, int num_centers){
   long population = accumulate(populations, populations+clients.size(), 0);
   double population_per_center = population/num_centers;
   long * costs = (long *) calloc(clients.size() * num_centers, sizeof(long));
@@ -21,6 +21,7 @@ pair<vector<Point>, vector<int>> choose_centers(vector<Point> clients, long * po
   vector<double> distances_sq(clients.size()*num_centers, numeric_limits<double>::infinity());
   double max_dist_sq = 0;
   vector<int> assignment(clients.size());
+  vector<int> old_assignment(clients.size());
   vector<Point> new_centers(num_centers);
   bool different = false;
   do {//iterate until stable
@@ -42,18 +43,16 @@ pair<vector<Point>, vector<int>> choose_centers(vector<Point> clients, long * po
     }
     //find assignment of clients to centers
     find_assignment(costs, populations, clients.size(), num_centers, assignment);
+    different = assignment != old_assignment;
+    old_assignment = assignment;
     //move centers to centroids
     //first initialize accumulators to the zero point
     fill(new_centers.begin(), new_centers.end(), Point(0.,0.));
     for (int i = 0; i < clients.size(); ++i){
       new_centers[assignment[i]] = new_centers[assignment[i]].add(clients[i].scale(populations[i]));
     }
-    different = false;
     for (int j = 0; j < num_centers; ++j){
       Point new_center = new_centers[j].scale(1./population_per_center);
-      if (new_center != centers[j]){
-	different = true;
-      }
       centers[j] = new_center;
     }
     double sum_of_dist_sq = 0.;
