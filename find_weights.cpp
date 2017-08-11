@@ -27,6 +27,7 @@ vector<double> find_weights(const vector<Point> & clients, const vector<Point> &
   }
   //Next compute distances from center 0 (arbitrarily chosen)
   vector<double> weights(centers.size(), numeric_limits<double>::infinity());
+  vector<int> pred(centers.size(), -1);
   weights[0] = 0.;
   int y = centers.size(); //upper bound on number of iterations
   bool different = true;
@@ -39,13 +40,20 @@ vector<double> find_weights(const vector<Point> & clients, const vector<Point> &
           double new_dist = weights[j] + lengths[j*centers.size()+k];
           if (new_dist < weights[k]){
             weights[k] = new_dist;
+            pred[k] = j;
             different = true;
           }
         }
       }
     }
     y -= 1;
-    assert(y >= 0);
+    if (y < 0){
+      for (int k = 0; k < centers.size(); ++k){
+        cout << "center " << k << " predecessor " << pred[k] << " via arc of cost " << lengths[pred[k]*centers.size()+k] << "\n";
+      }
+      weights.clear();
+      return weights;
+    }
   } while (different);
   //Finally, make all the weights nonnegative.
   //This involves just subtracting the minimum weight from all the weights

@@ -1,6 +1,5 @@
 #include "redistrict.hpp"
 #include "rand_point.hpp"
-#include "find_weights.hpp"
 
 #include <algorithm>    // std::generate
 using namespace std;
@@ -30,13 +29,10 @@ int main(int argc, char *argv[]){
   generate(clients.begin(), clients.end(), rand_point);
   long * populations = (long *) calloc(num_clients, sizeof(long));
   fill(populations, populations+num_clients, 1);
-  pair<vector<Point>, vector<int> > p = choose_centers(clients, populations, num_centers);
-  vector<Point> centers = p.first;
+  auto [centers, assignment, weights ] = choose_centers(clients, populations, num_centers);
   if (centers.size() == 0){
     cout << "FAILURE TO CONVERGE\n";
     return -1;
   }
-  vector<int> assignment = p.second;
-  vector<double> weights = find_weights(clients, centers, assignment);
   print_out(num_centers, num_clients, centers, weights, clients, assignment);
 }

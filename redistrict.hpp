@@ -13,4 +13,4 @@ using namespace std;
 // }
 
 
-pair<vector<Point>, vector<int> > choose_centers(vector<Point> clients, long * populations, int num_centers);
+tuple<vector<Point>, vector<int>, vector<double> > choose_centers(vector<Point> clients, long * populations, int num_centers);

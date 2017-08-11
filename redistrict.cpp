@@ -1,8 +1,10 @@
 #include <numeric>
 #include <limits>
+#include <tuple>
 #include "initial_centers.hpp"
 #include "mincostflow.hpp"
 #include "redistrict.hpp"
+#include "find_weights.hpp"
 /* 
  Assign initial center locations.
  Repeat: 
@@ -13,7 +15,7 @@
 using namespace std;
 
 // 
-pair<vector<Point>, vector<int> > choose_centers(vector<Point> clients, long * populations, int num_centers){
+tuple<vector<Point>, vector<int>, vector<double> > choose_centers(vector<Point> clients, long * populations, int num_centers){
   long population = accumulate(populations, populations+clients.size(), 0);
   double population_per_center = population/num_centers;
   long * costs = (long *) calloc(clients.size() * num_centers, sizeof(long));
@@ -23,7 +25,7 @@ pair<vector<Point>, vector<int> > choose_centers(vector<Point> clients, long * p
   vector<int> old_assignment(clients.size());
   vector<Point> centers;
   bool different;
-  for (int tries = 0; tries < 10; ++tries){
+  for (int tries = 0; tries < 100; ++tries){
     different = false;
   centers = choose_initial_centers(clients, populations, num_centers);
   vector<Point> new_centers(num_centers);
@@ -68,18 +70,14 @@ pair<vector<Point>, vector<int> > choose_centers(vector<Point> clients, long * p
     }
     std::cerr << "sum of dist sq: " << sum_of_dist_sq << " max: " << max_dist_sq_assigned << "\n";
   }
-  while (different and ++iter_count < 8);
-  if (!different){
-    break;
+  while (different and ++iter_count < 50);
+  vector<double> weights = find_weights(clients, centers, assignment);
+  if (weights.size() > 0){
+    return make_tuple(centers, assignment, weights);
   }
-  cout << "Attempt " << iter_count << " failed\n";
   }
-  if (different){
-    centers.clear();//signal no stable assignment found
-  }
-  return make_pair(centers, assignment);
+  centers.clear();
+  vector<double> weights;
+  return make_tuple(centers, assignment, weights);
 }
-    
-      
-    
   
