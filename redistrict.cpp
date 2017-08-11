@@ -17,13 +17,17 @@ pair<vector<Point>, vector<int> > choose_centers(vector<Point> clients, long * p
   long population = accumulate(populations, populations+clients.size(), 0);
   double population_per_center = population/num_centers;
   long * costs = (long *) calloc(clients.size() * num_centers, sizeof(long));
-  vector<Point> centers = choose_initial_centers(clients, populations, num_centers);
   vector<double> distances_sq(clients.size()*num_centers, numeric_limits<double>::infinity());
   double max_dist_sq = 0;
   vector<int> assignment(clients.size());
   vector<int> old_assignment(clients.size());
+  vector<Point> centers;
+  bool different;
+  for (int tries = 0; tries < 10; ++tries){
+    different = false;
+  centers = choose_initial_centers(clients, populations, num_centers);
   vector<Point> new_centers(num_centers);
-  bool different = false;
+  int iter_count = 0;
   do {//iterate until stable
     for (int i = 0; i < clients.size(); ++i){
       //find distances to centers
@@ -64,7 +68,15 @@ pair<vector<Point>, vector<int> > choose_centers(vector<Point> clients, long * p
     }
     std::cerr << "sum of dist sq: " << sum_of_dist_sq << " max: " << max_dist_sq_assigned << "\n";
   }
-  while (different);
+  while (different and ++iter_count < 8);
+  if (!different){
+    break;
+  }
+  cout << "Attempt " << iter_count << " failed\n";
+  }
+  if (different){
+    centers.clear();//signal no stable assignment found
+  }
   return make_pair(centers, assignment);
 }
     
