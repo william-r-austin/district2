@@ -6,10 +6,6 @@ from matplotlib import colors as mcolors
 color_dict = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 colors = [x for x in color_dict if x not in {"w",'aliceblue','antiquewhite','azure','beige','bisque','blanchedalmond'}]
 
-if len(sys.argv) < 2:
-    print("Use: ", sys.argv[0], "[file name]")
-    exit(-1)
-
 def Parse(filename):
     f = open(filename, "r")
     lines = f.readlines()
@@ -23,7 +19,7 @@ def Parse(filename):
         x = float(s[0])
         y = float(s[1])
         z = float(s[2])
-        C.append([x,y])
+        C.append([x,y,z])
 
     assign_pairs = {}
     A = []
@@ -121,27 +117,35 @@ def plot_regions(proj_regions):
         
         
 
-C_3D, A, assign_pairs = Parse(sys.argv[1])
-C = [[p[0],p[1]] for p in C_3D]
-
 def unbounded(input_region): return any(x==-1 for x in input_region)
 ## insert points to remove
 ## infinite regions
-bbox = find_bounding_box(C_3D)
-minpt, maxpt = bbox
-extent = find_extent([minpt,maxpt])
-smallpt, bigpt = [minpt[i]-extent[i] for i in range(3)], [maxpt[i]+extent[i] for i in range(3)]
 
-boundary = np.array([smallpt, [bigpt[0],smallpt[1],smallpt[2]],
+def plot_helper(C_3D, A, assign_pairs):
+    C = [[p[0],p[1]] for p in C_3D]
+    bbox = find_bounding_box(C_3D)
+    minpt, maxpt = bbox
+    extent = find_extent([minpt,maxpt])
+    smallpt, bigpt = [minpt[i]-extent[i] for i in range(3)], [maxpt[i]+extent[i] for i in range(3)]
+    boundary = np.array([smallpt, [bigpt[0],smallpt[1],smallpt[2]],
                      [smallpt[0],bigpt[1],smallpt[2]],
                      [smallpt[0],smallpt[1],bigpt[2]],
                      [bigpt[0],bigpt[1],smallpt[2]],
                      [smallpt[0],bigpt[1],bigpt[2]],
                      [bigpt[0],smallpt[1],bigpt[2]],
                      bigpt])
-diagram = sp.Voronoi(np.concatenate((C_3D,boundary)))
-bounded_regions = [[diagram.vertices[j] for j in region]
-                   for region in diagram.regions
-                   if region != [] and not unbounded(region)]
-proj_regions = find_proj(bounded_regions)
-PlotAll(C,A,assign_pairs, proj_regions)
+    diagram = sp.Voronoi(np.concatenate((C_3D,boundary)))
+    bounded_regions = [[diagram.vertices[j] for j in region]
+                       for region in diagram.regions
+                       if region != [] and not unbounded(region)]
+    proj_regions = find_proj(bounded_regions)
+    PlotAll(C,A,assign_pairs, proj_regions)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Use: ", sys.argv[0], "[file name]")
+        exit(-1)
+    C_3D, A, assign_pairs = Parse(sys.argv[1])
+    plot_helper(C_3D, A, assign_pairs)
+    
