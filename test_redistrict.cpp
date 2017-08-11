@@ -1,15 +1,16 @@
 #include "redistrict.hpp"
 #include "rand_point.hpp"
+#include "find_weights.hpp"
 
 #include <algorithm>    // std::generate
 using namespace std;
 
 void print_out(int num_centers, int num_clients,
-	      vector<Point> centers, vector<Point> clients,
-	      vector<int> assignment){
+               const vector<Point> centers, const vector<double> &weights, const vector<Point> &clients,
+	      const vector<int> &assignment){
     cout << num_centers << " " << num_clients << endl;
-    for(int i = 0; i < num_centers; i++){
-	cout << centers[i].x << " " << centers[i].y << endl;
+    for(int j = 0; j < num_centers; j++){
+      cout << centers[j].x << " " << centers[j].y << " " << weights[j] << endl;
     }
     for(int i = 0; i < num_clients; i++){
 	cout << clients[i].x << " " << clients[i].y
@@ -28,6 +29,6 @@ int main(){
   pair<vector<Point>, vector<int> > p = choose_centers(clients, populations, num_centers);
   vector<Point> centers = p.first;
   vector<int> assignment = p.second;
-  // vector<Point> centers 
-  print_out(num_centers, num_clients, centers, clients, assignment);
+  vector<double> weights = find_weights(clients, centers, assignment);
+  print_out(num_centers, num_clients, centers, weights, clients, assignment);
 }
