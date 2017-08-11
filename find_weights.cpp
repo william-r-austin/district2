@@ -47,6 +47,10 @@ vector<double> find_weights(const vector<Point> & clients, const vector<Point> &
     y -= 1;
     assert(y >= 0);
   } while (different);
+  //Finally, make all the weights nonnegative.
+  //This involves just subtracting the minimum weight from all the weights
+  double min_weight = *(min_element(weights.begin(), weights.end()));
+  for (int j = 0; j < weights.size(); ++j) {weights[j] -= min_weight;}
   return weights;
 }
 
