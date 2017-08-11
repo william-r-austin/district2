@@ -53,7 +53,7 @@ test_redistrict.o: test_redistrict.cpp redistrict.hpp
 	$(CCOMP) $(CFLAGS) -c test_redistrict.cpp
 
 test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o point.o rand_point.o rand_float.o
-	$(CCOMP) $(CFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o rand_point.o point.o rand_float.o -o test_redistrict
+	$(CCOMP) $(CFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o test_redistrict
 
 find_weights.hpp: point.hpp
 
@@ -62,7 +62,6 @@ find_weights.o: find_weights.cpp find_weights.hpp
 
 test_find_weights.o: test_find_weights.cpp find_weights.hpp
 	$(CCOMP) $(CFLAGS) -c test_find_weights.cpp
-
 
 test_find_weights: test_find_weights.o find_weights.o point.o
 	$(CCOMP) $(CFLAGS) test_find_weights.o find_weights.o point.o -o test_find_weights
