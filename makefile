@@ -9,9 +9,8 @@
 # change these to suit your system
 CCOMP = g++
 #CCOMP = gcc-4
-#CFLAGS = -O4 -DNDEBUG
 #CFLAGS = -g -DCHECK_SOLUTION -Wall
-CFLAGS = -g -Wall -std=c++1z #-fms-extensions #-Wc++11-extensions
+CFLAGS = -O3 -Wall -std=c++1z #-g  # -fms-extensions #-Wc++11-extensions
 #CFLAGS = -O4 -DNDEBUG -DNO_ZERO_CYCLES
 BIN=cs2
 
