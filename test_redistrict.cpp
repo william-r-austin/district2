@@ -1,5 +1,7 @@
 #include "redistrict.hpp"
 #include "rand_point.hpp"
+#include <iomanip>      // std::setprecision
+#include <cmath>
 
 #include <algorithm>    // std::generate
 using namespace std;
@@ -8,8 +10,9 @@ void print_out(int num_centers, int num_clients,
                const vector<Point> centers, const vector<double> &weights, const vector<Point> &clients,
 	      const vector<int> &assignment){
     cout << num_centers << " " << num_clients << endl;
+    cout << setprecision(12);
     for(int j = 0; j < num_centers; j++){
-      cout << centers[j].x << " " << centers[j].y << " " << weights[j] << endl;
+      cout << centers[j].x << " " << centers[j].y << " " << sqrt(weights[j]) << endl;
     }
     for(int i = 0; i < num_clients; i++){
 	cout << clients[i].x << " " << clients[i].y
