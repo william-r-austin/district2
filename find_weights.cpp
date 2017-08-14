@@ -1,5 +1,7 @@
 #include <limits>
 #include <cassert>
+#include <iomanip>      // std::setprecision for debugging
+
 #include "find_weights.hpp"
 
 using namespace std;
@@ -49,7 +51,6 @@ vector<double> find_weights(const vector<Point> & clients, const vector<Point> &
     y -= 1;
     if (y < 0){
       for (int k = 0; k < centers.size(); ++k){
-        cout << "center " << k << " predecessor " << pred[k] << " via arc of cost " << lengths[pred[k]*centers.size()+k] << "\n";
       }
       weights.clear();
       return weights;
