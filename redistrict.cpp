@@ -14,8 +14,7 @@
 
 using namespace std;
 
-// 
-tuple<vector<Point>, vector<int>, vector<double> > choose_centers(vector<Point> clients, long * populations, int num_centers){
+tuple<vector<Point>, vector<int>, vector<double> > choose_centers(const vector<Point> &clients, long * populations, int num_centers){
   long population = accumulate(populations, populations+clients.size(), 0);
   double population_per_center = population/num_centers;
   long * costs = (long *) calloc(clients.size() * num_centers, sizeof(long));
@@ -41,10 +40,10 @@ tuple<vector<Point>, vector<int>, vector<double> > choose_centers(vector<Point> 
       }
     }
     //convert doubles to ints
+    double scale = (double) LONG_MAX / max_dist_sq/ (clients.size()*num_centers)/100;
     for (int i = 0; i < clients.size(); ++i){
       for (int j = 0; j < centers.size(); ++j){
-	costs[i*num_centers+j] = (long) ((distances_sq[i*num_centers+j]/max_dist_sq) * 10000/*INT_MAX*/)/(num_centers*num_centers);
-	//	std::cerr << "at client " << i << " and center " << j << ", distance is " << distances_sq[i*num_centers+j] << ", fraction distance is " <<  distances_sq[i*num_centers+j]/max_dist_sq << ", cost is " << costs[i*num_centers+j] << "\n";
+	costs[i*num_centers+j] = (long) (scale * distances_sq[i*num_centers+j]);
       }
     }
     //find assignment of clients to centers
@@ -61,14 +60,6 @@ tuple<vector<Point>, vector<int>, vector<double> > choose_centers(vector<Point> 
       Point new_center = new_centers[j].scale(1./population_per_center);
       centers[j] = new_center;
     }
-    double sum_of_dist_sq = 0.;
-    double max_dist_sq_assigned = 0;
-    for (int i = 0; i < clients.size(); ++i){
-      double d = centers[assignment[i]].dist_sq(clients[i]);
-      sum_of_dist_sq += d;
-      if (d > max_dist_sq_assigned) max_dist_sq_assigned = d;
-    }
-    std::cerr << "sum of dist sq: " << sum_of_dist_sq << " max: " << max_dist_sq_assigned << "\n";
   }
   while (different and ++iter_count < 50);
   vector<double> weights = find_weights(clients, centers, assignment);
