@@ -25,6 +25,7 @@ tuple<vector<Point>, vector<int>, vector<double> > choose_centers(const vector<P
   vector<Point> centers;
   bool different;
   for (int tries = 0; tries < 100; ++tries){
+    cerr << tries << "\n";      
     different = false;
   centers = choose_initial_centers(clients, populations, num_centers);
   vector<Point> new_centers(num_centers);

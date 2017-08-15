@@ -12,7 +12,7 @@ CCOMP = g++
 #CFLAGS = -g -DCHECK_SOLUTION -Wall
 CFLAGS = -O3 -Wall -std=c++1z #-g  # -fms-extensions #-Wc++11-extensions
 #CFLAGS = -O4 -DNDEBUG -DNO_ZERO_CYCLES
-BIN=cs2
+BIN=cs2 do_redistrict
 
 cs2.exe: cs2.c types_cs2.h timer.c
 #	$(CCOMP) $(CFLAGS) -o $(BIN) cs2.c -lm
@@ -48,11 +48,17 @@ mincostflow.o: mincostflow.cpp mincostflow.hpp build_graph.h types_cs2.h
 redistrict.o: redistrict.cpp redistrict.hpp point.hpp
 	$(CCOMP) $(CFLAGS) -c redistrict.cpp
 
-test_redistrict.o: test_redistrict.cpp redistrict.hpp
+test_redistrict.o: test_redistrict.cpp redistrict.hpp rand_point.hpp
 	$(CCOMP) $(CFLAGS) -c test_redistrict.cpp
+
+do_redistrict.o: do_redistrict.cpp redistrict.hpp
+	$(CCOMP) $(CFLAGS) -c do_redistrict.cpp
 
 test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o point.o rand_point.o rand_float.o
 	$(CCOMP) $(CFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o test_redistrict
+
+do_redistrict: do_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o rand_point.o rand_float.o point.o
+	$(CCOMP) $(CFLAGS) do_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o do_redistrict
 
 find_weights.hpp: point.hpp
 
