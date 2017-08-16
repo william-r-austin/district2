@@ -7,11 +7,11 @@
 # CHECK_SOLUTION check feasibility/optimality. HIGH OVERHEAD!
 
 # change these to suit your system
-CCOMP = g++
+CCOMP = g++-7 
 #CCOMP = gcc-4
 #CFLAGS = -g -DCHECK_SOLUTION -Wall
 DEBUG = -g 
-CFLAGS = -O3 -Wall
+CFLAGS = -O3 -Wall 
 CPPFLAGS = -g -Wall -std=c++1z #-g  # -fms-extensions #-Wc++11-extensions
 #CFLAGS = -O4 -DNDEBUG -DNO_ZERO_CYCLES
 BIN=cs2 do_redistrict
@@ -59,7 +59,7 @@ do_redistrict.o: do_redistrict.cpp redistrict.hpp
 test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o point.o rand_point.o rand_float.o
 	$(CCOMP) $(CPPFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o test_redistrict
 
-do_redistrict: do_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o rand_point.o rand_float.o point.o
+do_redistrict: do_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o rand_point.o rand_float.o point.o print_out_solution.o
 	$(CCOMP) $(CPPFLAGS) do_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o print_out_solution.o rand_float.o -o do_redistrict
 
 find_weights.hpp: point.hpp

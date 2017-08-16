@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <limits>
 #include <cassert>
 #include <iomanip>      // std::setprecision for debugging

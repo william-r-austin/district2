@@ -1,5 +1,5 @@
 #include <numeric>
-#include <limits>
+#include <climits>
 #include <tuple>
 #include "initial_centers.hpp"
 #include "mincostflow.hpp"
