@@ -16,9 +16,10 @@ void print_out(const vector<Point> centers, const vector<double> &weights, const
     cout << centers[j].x << " " << centers[j].y << " " << sqrt(weights[j]) << endl;
   }
   for(int i = 0; i < num_clients; i++){
-    cout << clients[i].x << " " << clients[i].y;
-    for (AssignmentElement ae : assignment[i]){
-      cout << " "<< ae.center << " " << ae.flow << endl;
-    }
+      cout << clients[i].x << " " << clients[i].y ;
+      for (AssignmentElement ae : assignment[i]){
+    	  cout << " "<< ae.center <<" " << ae.flow ;	 
+      }
+      cout << endl;
   }
 }
