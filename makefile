@@ -10,11 +10,13 @@
 CCOMP = g++
 #CCOMP = gcc-4
 #CFLAGS = -g -DCHECK_SOLUTION -Wall
-CFLAGS = -O3 -Wall -std=c++1z #-g  # -fms-extensions #-Wc++11-extensions
+DEBUG = -g 
+CFLAGS = -O3 -Wall
+CPPFLAGS = -g -Wall -std=c++1z #-g  # -fms-extensions #-Wc++11-extensions
 #CFLAGS = -O4 -DNDEBUG -DNO_ZERO_CYCLES
 BIN=cs2 do_redistrict
 
-cs2.exe: cs2.c types_cs2.h timer.c
+cs2.exe: cs2.c types_cs2.h timer.c assignment.hpp
 #	$(CCOMP) $(CFLAGS) -o $(BIN) cs2.c -lm
 	$(CCOMP) $(CFLAGS) -DPRINT_ANS -DCOMP_DUALS -DCOST_RESTART -o $(BIN) cs2.c -lm
 
@@ -22,54 +24,54 @@ clean:
 	rm -f $(BIN) *~
 
 rand_float.o: rand_float.cpp rand_float.hpp
-	$(CCOMP) $(CFLAGS) -c rand_float.cpp
+	$(CCOMP) $(CPPFLAGS) -c rand_float.cpp
 
 point.o: point.cpp point.hpp
-	$(CCOMP) $(CFLAGS) -c point.cpp
+	$(CCOMP) $(CPPFLAGS) -c point.cpp
 
 rand_point.o: rand_point.cpp rand_point.hpp
-	$(CCOMP) $(CFLAGS) -c rand_point.cpp
-
-#distances.o : distances.cpp distances.hpp
-#	$(CCOMP) $(CFLAGS) -c distances.cpp
+	$(CCOMP) $(CPPFLAGS) -c rand_point.cpp
 
 initial_centers.o: initial_centers.cpp initial_centers.hpp point.hpp rand_float.hpp
-	$(CCOMP) $(CFLAGS) -c initial_centers.cpp
+	$(CCOMP) $(CPPFLAGS) -c initial_centers.cpp
 
 test_initial_centers.o: test_initial_centers.cpp initial_centers.hpp point.hpp rand_float.hpp
-	$(CCOMP) $(CFLAGS) -c test_initial_centers.cpp
+	$(CCOMP) $(CPPFLAGS) -c test_initial_centers.cpp
 
 test_initial_centers: test_initial_centers.o initial_centers.o point.o
-	$(CCOMP) $(CFLAGS) test_initial_centers.o initial_centers.o point.o -o test_initial_centers
+	$(CCOMP) $(CPPFLAGS) test_initial_centers.o initial_centers.o point.o -o test_initial_centers
 
-mincostflow.o: mincostflow.cpp mincostflow.hpp build_graph.h types_cs2.h
+mincostflow.o: mincostflow.cpp mincostflow.hpp build_graph.h types_cs2.h assignment.hpp
 	$(CCOMP) $(CFLAGS) -c mincostflow.cpp
 
-redistrict.o: redistrict.cpp redistrict.hpp point.hpp
-	$(CCOMP) $(CFLAGS) -c redistrict.cpp
+redistrict.o: redistrict.cpp redistrict.hpp point.hpp assignment.hpp
+	$(CCOMP) $(CPPFLAGS) -c redistrict.cpp
+
+print_out_solution.o: print_out_solution.cpp
+	$(CCOMP) $(CPPFLAGS) -c print_out_solution.cpp
 
 test_redistrict.o: test_redistrict.cpp redistrict.hpp rand_point.hpp
-	$(CCOMP) $(CFLAGS) -c test_redistrict.cpp
+	$(CCOMP) $(CPPFLAGS) -c test_redistrict.cpp
 
 do_redistrict.o: do_redistrict.cpp redistrict.hpp
-	$(CCOMP) $(CFLAGS) -c do_redistrict.cpp
+	$(CCOMP) $(CPPFLAGS) -c do_redistrict.cpp
 
 test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o point.o rand_point.o rand_float.o
-	$(CCOMP) $(CFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o test_redistrict
+	$(CCOMP) $(CPPFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o test_redistrict
 
 do_redistrict: do_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o rand_point.o rand_float.o point.o
-	$(CCOMP) $(CFLAGS) do_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o do_redistrict
+	$(CCOMP) $(CPPFLAGS) do_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o print_out_solution.o rand_float.o -o do_redistrict
 
 find_weights.hpp: point.hpp
 
 find_weights.o: find_weights.cpp find_weights.hpp
-	$(CCOMP) $(CFLAGS) -c find_weights.cpp
+	$(CCOMP) $(CPPFLAGS) -c find_weights.cpp
 
 test_find_weights.o: test_find_weights.cpp find_weights.hpp
-	$(CCOMP) $(CFLAGS) -c test_find_weights.cpp
+	$(CCOMP) $(CPPFLAGS) -c test_find_weights.cpp
 
 test_find_weights: test_find_weights.o find_weights.o point.o
-	$(CCOMP) $(CFLAGS) test_find_weights.o find_weights.o point.o -o test_find_weights
+	$(CCOMP) $(CPPFLAGS) test_find_weights.o find_weights.o point.o -o test_find_weights
 
 
 

@@ -5,6 +5,7 @@
 #include "mincostflow.hpp"
 #include "redistrict.hpp"
 #include "find_weights.hpp"
+
 /* 
  Assign initial center locations.
  Repeat: 
@@ -14,20 +15,19 @@
 
 using namespace std;
 
-tuple<vector<Point>, vector<int>, vector<double> > choose_centers(const vector<Point> &clients, long * populations, int num_centers){
-  long population = accumulate(populations, populations+clients.size(), 0);
-  double population_per_center = population/num_centers;
+tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Point> &clients, long * populations, int num_centers){
   long * costs = (long *) calloc(clients.size() * num_centers, sizeof(long));
   vector<double> distances_sq(clients.size()*num_centers, numeric_limits<double>::infinity());
   double max_dist_sq = 0;
-  vector<int> assignment(clients.size());
-  vector<int> old_assignment(clients.size());
+  Assignment assignment(clients.size());
+  Assignment old_assignment(clients.size());
   vector<Point> centers;
   bool different;
   for (int tries = 0; tries < 100; ++tries){
     cerr << tries << "\n";      
     different = false;
   centers = choose_initial_centers(clients, populations, num_centers);
+  vector<int> center2num_clients(num_centers);
   vector<Point> new_centers(num_centers);
   int iter_count = 0;
   do {//iterate until stable
@@ -54,11 +54,16 @@ tuple<vector<Point>, vector<int>, vector<double> > choose_centers(const vector<P
     //move centers to centroids
     //first initialize accumulators to the zero point
     fill(new_centers.begin(), new_centers.end(), Point(0.,0.));
+    fill(center2num_clients.begin(), center2num_clients.end(), 0);
+    //iterate through clients and the centers they are assigned to
     for (int i = 0; i < clients.size(); ++i){
-      new_centers[assignment[i]] = new_centers[assignment[i]].add(clients[i].scale(populations[i]));
+      for (AssignmentElement ae : assignment[i]){
+        new_centers[ae.center] = new_centers[ae.center].add(clients[i].scale(ae.flow));
+        center2num_clients[ae.center] += ae.flow;
+      }
     }
     for (int j = 0; j < num_centers; ++j){
-      Point new_center = new_centers[j].scale(1./population_per_center);
+      Point new_center = new_centers[j].scale(1./center2num_clients[j]);
       centers[j] = new_center;
     }
   }

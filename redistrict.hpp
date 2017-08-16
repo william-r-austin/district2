@@ -3,6 +3,7 @@
 #include "point.hpp"
 #include <utility>
 #include <tuple> // C++11, for std::tie
+#include "assignment.hpp"
 
 using namespace std;
 
@@ -13,4 +14,4 @@ using namespace std;
 // }
 
 
-tuple<vector<Point>, vector<int>, vector<double> > choose_centers(const vector<Point> &clients, long * populations, int num_centers);
+tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Point> &clients, long * populations, int num_centers);

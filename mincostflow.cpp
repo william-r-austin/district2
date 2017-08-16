@@ -10,6 +10,7 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+
 //#include <values.h>
 
 /* for measuring time */
@@ -1890,7 +1891,7 @@ void foo() {
   free(cap);
 }
 
-int find_assignment(long * costs, long * populations, int num_clients, int num_centers, std::vector<int> &assignment){
+int find_assignment(long * costs, long * populations, int num_clients, int num_centers, Assignment &assignment){
   double t;
   arc *arp;
   node *ndp;
@@ -1968,17 +1969,13 @@ int find_assignment(long * costs, long * populations, int num_clients, int num_c
 #endif
   
   for (int i = 0; i < num_clients; ++i){
-    //assign the client to the center to which the client sends the most flow
-    //(Not sure if that works.)
-    int center;
-    int flow = 0;
+    assignment[i].clear();
     for (arc* a = G.nodes[i].suspended; a != G.nodes[i+1].suspended; ++a){
-      int a_flow = cap[ N_ARC (a) ] - (a -> r_cap );
-      if (a_flow > flow){
-	flow = a_flow;
-	center = (a -> head - G.nodes) - num_clients;
+      int flow = cap[ N_ARC (a) ] - (a -> r_cap );
+      if (flow > 0){
+        int center = (a -> head - G.nodes) - num_clients;
+        assignment[i].push_back(AssignmentElement(center, flow));
       }
-      assignment[i] = center;
     }
   }
 

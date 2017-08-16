@@ -2,5 +2,6 @@
 
 #include <vector>
 #include "point.hpp"
+#include "assignment.hpp"
 
-std::vector<double> find_weights(const std::vector<Point> & clients, const std::vector<Point> & centers, const std::vector<int> & assignment);
+std::vector<double> find_weights(const std::vector<Point> & clients, const std::vector<Point> & centers, const Assignment & assignment);
