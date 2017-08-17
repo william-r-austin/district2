@@ -2,10 +2,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 import scipy.spatial as sp
+import shapely.geometry as sg
 from matplotlib import colors as mcolors
 color_dict = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
 colors = [x for x in color_dict if x not in {"w",'aliceblue','antiquewhite','azure','beige','bisque','blanchedalmond'}]
 
+
+def Parse_and_plot_boundary(filename):
+    f = open(filename, "r")
+    lines = f.readlines()
+    points = []
+    for l in lines:
+        s = l.split()
+        x = float(s[0])
+        y = float(s[1])
+        points.append([x,y])
+        
+    convex_hull = sg.MultiPoint(points).convex_hull
+    x,y = convex_hull.exterior.xy
+    plt.plot(x, y, linewidth=3, color = 'black')
+        
+        
 def Parse(filename):
     f = open(filename, "r")
     lines = f.readlines()
@@ -120,7 +137,6 @@ def find_proj(bounded_regions):
     return proj_regions
 
 def plot_regions(proj_regions):
-    import shapely.geometry as sg
 
     for r in proj_regions:
         if proj_regions[r] == []: continue
@@ -157,9 +173,10 @@ def plot_helper(C_3D, A, assign_pairs,bbox):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print("Use: ", sys.argv[0], "[file name]")
+    if len(sys.argv) < 3:
+        print("Use: ", sys.argv[0], "[file name] [state boundary file]")
         exit(-1)
     C_3D, A, assign_pairs, box = Parse(sys.argv[1])
+    Parse_and_plot_boundary(sys.argv[2])
     plot_helper(C_3D, A, assign_pairs, box)
     
