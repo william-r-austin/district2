@@ -12,7 +12,9 @@ def Parse(filename):
     s = lines[0].split()
     nb_centers = int(s[0])
     nb_clients = int(s[1])
-
+    x_min, y_min, z_min = (float("inf"),float("inf"),float("inf"))
+    x_max, y_max, z_max = (-float("inf"),-float("inf"),-float("inf"))
+    
     C = []
     for i in range(1, nb_centers+1):
         s = lines[i].split()
@@ -20,6 +22,13 @@ def Parse(filename):
         y = float(s[1])
         z = float(s[2])
         C.append([x,y,z])
+        x_max = max(x_max, x)
+        y_max = max(y_max, y)
+        z_max = max(z_max, z)
+        x_min = min(x_min, x)
+        y_min = min(y_min, y)
+        z_min = min(z_min, z)
+        
 
     assign_pairs = {}
     A = []
@@ -31,10 +40,14 @@ def Parse(filename):
         A.append([x,y])
         assign_pairs[j] = int(s[2])
         j+=1
+        x_max = max(x_max, x)
+        y_max = max(y_max, y)
+        x_min = min(x_min, x)
+        y_min = min(y_min, y)
 
-    return C,A,assign_pairs
+    return C,A,assign_pairs, [[x_min,y_min,z_min],[x_max,y_max,z_max]]
 
-def PlotAll(C, A, assignment, bounded_regions):
+def PlotAll(C, A, assignment, bounded_regions,bbox):
     diagram = sp.Voronoi(C)
     # sp.voronoi_plot_2d(diagram)
     for i in range(len(C)):
@@ -43,8 +56,9 @@ def PlotAll(C, A, assignment, bounded_regions):
         plt.plot(A[j][0],A[j][1], 'x', color = colors[assignment[j]])
     axes = plt.gca()
     plot_regions(bounded_regions)
-    axes.set_xlim([-3,7])
-    axes.set_ylim([-3,7])
+    # axes.set_xlim([-3,7])
+    # axes.set_ylim([-3,7])
+    plt.axis([bbox[0][0],bbox[1][0], bbox[0][1],bbox[1][1]])
     plt.show(block=True)
 
 
@@ -121,9 +135,9 @@ def unbounded(input_region): return any(x==-1 for x in input_region)
 ## insert points to remove
 ## infinite regions
 
-def plot_helper(C_3D, A, assign_pairs):
+def plot_helper(C_3D, A, assign_pairs,bbox):
     C = [[p[0],p[1]] for p in C_3D]
-    bbox = find_bounding_box(C_3D)
+    # bbox = find_bounding_box(C_3D)
     minpt, maxpt = bbox
     extent = find_extent([minpt,maxpt])
     smallpt, bigpt = [minpt[i]-extent[i] for i in range(3)], [maxpt[i]+extent[i] for i in range(3)]
@@ -139,13 +153,13 @@ def plot_helper(C_3D, A, assign_pairs):
                        for region in diagram.regions
                        if region != [] and not unbounded(region)]
     proj_regions = find_proj(bounded_regions)
-    PlotAll(C,A,assign_pairs, proj_regions)
+    PlotAll(C,A,assign_pairs, proj_regions,bbox)
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Use: ", sys.argv[0], "[file name]")
         exit(-1)
-    C_3D, A, assign_pairs = Parse(sys.argv[1])
-    plot_helper(C_3D, A, assign_pairs)
+    C_3D, A, assign_pairs, box = Parse(sys.argv[1])
+    plot_helper(C_3D, A, assign_pairs, box)
     
