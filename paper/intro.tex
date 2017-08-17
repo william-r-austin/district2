@@ -1,0 +1,103 @@
+\section{Introduction}
+
+Consider the following optimization problem, {\em capacitated $k$-means
+  clustering}:
+\begin{itemize}
+\item {\bf input:} A set $\cal P$ of points (the
+{\em clients}), a positive integer $k$, and a $k$-tuple
+$(b_1, \ldots, b_k)$ of nonnegative integers whose sum is the number
+of clients.
+\item {\bf output:} A $k$-tuple $(c_1, \ldots, c_k)$ of points
+(the {\em centers}) and an assignment of clients to centers, such that
+center $c_i$ is assigned at most $b_i$ clients.
+\item {\bf objective:} Minimize the sum of squared
+distances from clients to their assigned centers.
+\end{itemize}
+We say the assignment {\em respects} the capacities to indicate that
+the number of clients assigned each center is no more than the
+corresponding capacity.
+
+The problem is theoretically intractable so
+we do not propose an algorithm that is guaranteed to find the best
+solution.  Instead, we consider a natural local-search heuristic.
+Before outlining this heuristic, we review a traditional clustering
+problem and the traditional method for solving it.
+
+\subsection{Traditional {\em $k$-means}}
+There is a well-known clustering problem, often 
+called {\em $k$-means clustering}, that does not involve capacities:
+\begin{itemize}
+\item {\bf input:} A set $\cal P$ of points (the
+{\em clients}) and a positive integer $k$
+\item {\bf output:} A $k$-tuple $(c_1, \ldots, c_k)$ of points
+(the {\em centers}) and an assignment of clients to centers.
+\item {\bf objective:} Minimize the sum of squared
+distances from clients to their assigned centers.
+\end{itemize}
+This optimization problem is also\footnote{In fact, the intractability
+  of this problem implies the intractability of the capacitated
+  problem } theoretically intractable (it is NP-hard~\cite{***}) but 
+it is often addressed in practice by an algorithm, sometimes
+called the {\em $k$-means algorithm} and sometimes called {\em
+  Lloyd's algorithm}.  The algorithm selects initial values for
+the centers $c_1, \ldots, c_k$, and then repeats the following two
+steps.
+\begin{itemize}
+\item {\bf Assignment step:} Assign each client to the closest center.
+\item {\bf Update step:} For each center $c_i$, find the centroid of
+  the clients assigned to it, and update $c_i$ to be this centroid.
+\end{itemize}
+This local-search algorithm continues until further repetition does
+not change the locations of the centers.
+
+Because the $k$-means clustering problem is considered theoretically
+intractable, it is believed that no algorithm is guaranteed both to
+terminate quickly and find an optimal solution.  The $k$-means
+algorithm in fact fails in both respects: it sometimes requires a huge
+amount of time (exceeding any fixed polynomial in $n$, the number of
+clients) and when it terminates the output solution might not be the
+best solution possible.  However, it tends to work well and is widely
+used.
+
+Note that in each of the two steps the algorithm makes choices so as
+to minimize the sum of squared client-to-center distances.
+\begin{itemize}
+\item   In the
+assignment step, each client's contribution to that sum is the
+squared distance of that client to the center to which it is assigned,
+so the algorithm chooses that center so as to minimize that
+contribution.
+
+\item In the update step, consider the set of clients assigned to some
+  center $c_i$.  The point $\hat c$ that minimizes the sum of squared
+  distances from those clients to $\hat c$ is the centroid of those
+  points, so the algorithm updates $c_i$ to be that centroid.
+\end{itemize}
+
+\subsection{Capacitated {\em $k$-means}}
+
+There is a natural way to adapt the $k$-means algorithm to address the
+capacitated problem.  The assignment step should be replaced with one
+that chooses the assignment of clients to centers to minimize the sum
+of squared distances {\em subject to} the capacity constraints.  Thus
+the modified algorithm at a high level is as follows.
+
+The {\em capacitated $k$-means algorithm} selects initial values for
+the centers $c_1, \ldots, c_k$, and then repeats the following two
+steps.
+\begin{itemize}
+\item {\bf Assignment step:} Choose the assignment of clients to
+  centers that minimizes the sum of squared client-to-assigned-centers
+  distances over all assignments that respect the capacities.
+\item {\bf Update step:} For each center $c_i$, find the centroid of
+  the clients assigned to it, and update $c_i$ to be this centroid.
+\end{itemize}
+The algorithm continues until further repetition does not change the
+locations of the centers.
+
+Of course, like the $k$-means algorithm, the capacitated $k$-means
+algorithm is guaranteed neither to terminate quickly nor to output an
+optimal solution.  However, note that it does output a solution that
+respects the capacities.  
+
+The new assignment step is considerably more complicated than
