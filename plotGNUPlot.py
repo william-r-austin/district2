@@ -158,7 +158,7 @@ def clip(polygons, boundary):
     
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("Use: ", sys.argv[0], "[file name] [output GML file]")
+        print("Use: ", sys.argv[0], "[file name] [output GNUplot file]")
         exit(-1)
     C_3D, A, polygons, bbox = Parse(sys.argv[1])
 

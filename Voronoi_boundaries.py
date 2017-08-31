@@ -5,8 +5,30 @@ import scipy.spatial as sp
 import shapely.geometry as sg
 from matplotlib import colors as mcolors
 color_dict = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
-colors = [x for x in color_dict if x not in {"w",'aliceblue','antiquewhite','azure','beige','bisque','blanchedalmond'}]
+# colors = [x for x in color_dict if x not in {"w",'aliceblue','antiquewhite','azure','beige','bisque','blanchedalmond'}]
+colors = [
+'red',                #ff0000 = 255   0   0
+'web-green',          #00c000 =   0 192   0
+'web-blue',         #0080ff =   0 128 255
+'dark-magenta',       #c000ff = 192   0 255
+'dark-cyan',         #00eeee =   0 238 238
+'dark-orange',        #c04000 = 192  64   0
+'dark-yellow',        #c8c800 = 200 200   0
+'royalblue',          #4169e1 =  65 105 225
+'goldenrod',          #ffc020 = 255 192  32
+'dark-spring-green',  #008040 =   0 128  64
+'purple',             #c080ff = 192 128 255
+'steelblue',          #306080 =  48  96 128
+'dark-red',           #8b0000 = 139   0   0
+'dark-chartreuse',    #408000 =  64 128   0
+'orchid',             #ff80ff = 255 128 255
+'aquamarine',         #7fffd4 = 127 255 212
+'brown',              #a52a2a = 165  42  42
+'yellow',          #ffff00 = 255 255   0
+'turquoise'
+]
 
+    
 
         
         
