@@ -23,4 +23,6 @@ def write_client_file(input_filename, output_filename):
             cent = shape(shape_rec.shape).centroid
             of.write(str(cent.x)+" "+str(cent.y)+" "+str(pop)+"\n")
 
-        
+
+import sys
+write_client_file(sys.argv[1],sys.argv[2])

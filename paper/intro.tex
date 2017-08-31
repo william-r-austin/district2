@@ -1,0 +1,187 @@
+\section{Introduction}
+
+Consider the following optimization problem, {\em capacitated $k$-means
+  clustering}:
+\begin{itemize}
+\item {\bf input:} A set $\cal P$ of points (the
+{\em clients}), a positive integer $k$, and a $k$-tuple
+$(b_1, \ldots, b_k)$ of nonnegative integers whose sum is the number
+of clients.
+\item {\bf output:} A $k$-tuple $(c_1, \ldots, c_k)$ of points
+(the {\em centers}) and an assignment of clients to centers, such that
+center $c_i$ is assigned at most $b_i$ clients.
+\item {\bf objective:} Minimize the sum of squared
+distances from clients to their assigned centers.
+\end{itemize}
+We say the assignment {\em respects} the capacities to indicate that
+the number of clients assigned each center is no more than the
+corresponding capacity.
+
+The problem is theoretically intractable so
+we do not propose an algorithm that is guaranteed to find the best
+solution.  Instead, we consider a natural local-search heuristic.
+Before outlining this heuristic, we review a traditional clustering
+problem and the traditional method for solving it.
+
+\subsection{Traditional {\em $k$-means}}
+There is a well-known clustering problem, often 
+called {\em $k$-means clustering}, that does not involve capacities:
+\begin{itemize}
+\item {\bf input:} A set $\cal P$ of points (the
+{\em clients}) and a positive integer $k$
+\item {\bf output:} A $k$-tuple $(c_1, \ldots, c_k)$ of points
+(the {\em centers}) and an assignment of clients to centers.
+\item {\bf objective:} Minimize the sum of squared
+distances from clients to their assigned centers.
+\end{itemize}
+This optimization problem is also\footnote{In fact, the intractability
+  of this problem implies the intractability of the capacitated
+  problem } theoretically intractable (it is NP-hard~\cite{***}) but 
+it is often addressed in practice by an algorithm, sometimes
+called the {\em $k$-means algorithm} and sometimes called {\em
+  Lloyd's algorithm}.  The algorithm selects initial values for
+the centers $c_1, \ldots, c_k$, and then repeats the following two
+steps.
+\begin{itemize}
+\item {\bf Assignment step:} Assign each client to the closest center.
+\item {\bf Update step:} For each center $c_i$, find the centroid of
+  the clients assigned to it, and update $c_i$ to be this centroid.
+\end{itemize}
+This local-search algorithm continues until further repetition does
+not change the locations of the centers.
+
+Because the $k$-means clustering problem is considered theoretically
+intractable, it is believed that no algorithm is guaranteed both to
+terminate quickly and find an optimal solution.  The $k$-means
+algorithm in fact fails in both respects: it sometimes requires a huge
+amount of time (exceeding any fixed polynomial in $n$, the number of
+clients) and when it terminates the output solution might not be the
+best solution possible.  However, it tends to work well and is widely
+used.
+
+Note that in each of the two steps the algorithm makes choices so as
+to minimize the sum of squared client-to-center distances.
+\begin{itemize}
+\item   In the
+assignment step, each client's contribution to that sum is the
+squared distance of that client to the center to which it is assigned,
+so the algorithm chooses that center so as to minimize that
+contribution.
+
+\item In the update step, consider the set of clients assigned to some
+  center $c_i$.  The point $\hat c$ that minimizes the sum of squared
+  distances from those clients to $\hat c$ is the centroid of those
+  points, so the algorithm updates $c_i$ to be that centroid.
+\end{itemize}
+
+\subsection{Capacitated {\em $k$-means}}
+
+There is a natural way to adapt the $k$-means algorithm to address the
+capacitated problem.  The assignment step should be replaced with one
+that chooses the assignment of clients to centers to minimize the sum
+of squared distances {\em subject to} the capacity constraints.  Thus
+the modified algorithm at a high level is as follows.
+
+The {\em capacitated $k$-means algorithm} selects initial values for
+the centers $c_1, \ldots, c_k$, and then repeats the following two
+steps.
+\begin{itemize}
+\item {\bf Assignment step:} Choose the assignment of clients to
+  centers that minimizes the sum of squared client-to-assigned-centers
+  distances over all assignments that respect the capacities.
+\item {\bf Update step:} For each center $c_i$, find the centroid of
+  the clients assigned to it, and update $c_i$ to be this centroid.
+\end{itemize}
+The algorithm continues until further repetition does not change the
+locations of the centers.
+
+Of course, like the $k$-means algorithm, the capacitated $k$-means
+algorithm is guaranteed neither to terminate quickly nor to output an
+optimal solution.  However, note that it does output a solution that
+respects the capacities.  
+
+The new assignment step is considerably more complicated than merely
+assigning each client to the nearest center.  However, it can be
+carried out in polynomial time.  The assignment step can be formulated
+as an instance of one classical problem called the {\em assignment
+  problem}.  Using, for example, the algorithm of~\cite{FredmanT}
+solves the problem in $O(n^3)$ time.  ~\cite{GabowT1989}.
+Our current implementation uses an implementation due to
+Goldberg~\ref{Goldberg97}of an algorithm for minimum-cost flow.
+
+In previous work, XXXXX proposed an algorithm equivalent to the
+capacitated $k$-means algorithm, except that a local-search heuristic
+was proposed to carry out the assignment step; use of such a heuristic
+does not guarantee that the step will be completed in polynomial time
+and does not guarantee that the solution obtained in that step is the
+best assignment.
+
+\subsection{Voronoi diagrams and power diagrams}
+
+Fix a set of centers in a metric space.  For each center $c$, the
+corresponding {\em Voronoi cell} is the set of points of the metric
+space that are no farther from $c$ than from any other center.
+The {\em Voronoi diagram} of the centers is the set of Voronoi cells.
+When the metric space is Euclidean (e.g. the plane $\R^2$), each
+Voronoi cell is a convex polyhedron.  
+
+A {\em power diagram} is a generalization of a Voronoi diagram.  With
+each center $c$ is associated a real number $w_c$, called the {\em weight} of
+the center.  The weighted squared distance of a point $p$ to a cell
+$c$ is the squared distance from $p$ to $c$ minus the weight of $c$.  
+ The {\em power cell} of $c$ consists of all points $p$ whose weighted squared
+ distance to $c$ is no more than the weighted squared distance to any
+ other center.
+
+ Consider the case in which the metric space is the Euclidean plane
+ $\R^2$.  Subtracting the same number from all weights does not change
+ the cells.  Thus we can assume without loss of generality that all
+ weights $w_c$ are negative.  Now consider each point $(x,y)$ in the
+ metric space $\R^2$ as a point $(x,y,0)$ in $\R^3$.  For each center
+ $c=(x,y)$, define the {\em modified center} $\hat c$ to be the point
+ $(x,y, \sqrt{-w_c})$.  As a consequence, for any point $p=(x,y)$ in
+ $\R^2$, the squared weighted distance from $p$ to a center $c$ equals
+ the squared distance from $(x,y,0)$ to the corresponding modified
+ center $\hat c$.  This in turn means that, for each center $c$, the
+ power cell of $c$ in $\R^2$ is exactly the intersection with the
+ plane $\set{(x,y,z)\ :\ z=0}$ of the Voronoi cell of $\hat c$ in
+ $\R^3$.  Because the Voronoi cells are convex polyhedra, so are the
+ power cells.
+
+\subsection{Representing the solution as a power diagram}
+
+What do Voronoi diagrams and power diagrams have to do with $k$-means?
+According to the assignment step for ordinary $k$-means, each client
+is assigned to the nearest center; under these circumstances, the
+client obviously belongs to the Voronoi cell of that client.  
+
+According to the assignment step for capacitated $k$-means,
+clients are assigned subject to capacity constraints, so might not be
+assigned to the nearest centers, so might not belong to the Voronoi
+cells of their assigned centers.  However, it has been shown that
+under these circumstances there are weights for which each client
+belongs to the power cell of its assigned center.
+
+\subsection{The result of the capacitated $k$-means algorithm}
+
+It follows that the solution obtained by the capacitated $k$-means
+algorithm is guaranteed to have the following properties:
+\begin{enumerate}
+\item Each client is assigned to a center.
+\item The number of clients assigned to each center equals the
+  capacity of the center.
+\item Each center is at the centroid of the clients assigned to it.
+\item The plane can be decomposed into $k$ convex polygons, such that
+  each polygon contains the clients assigned to one of the centers.
+\end{enumerate}
+We cannot prove that the polygons are well-rounded; in principle, some
+might be long and skinny.  However, because the $k$-means algorithm is
+known to be an effective heuristic for minimizing the sum of squared
+distances from clients to centers, there is reason to believe that the
+capacitated $k$-means algorithm is similarly an effective heuristic
+for minimizing the sum of squared client-to-center distances subject
+to capacities.  We therefore expect that typically the polygons will
+have small aspect ratio (ratio of diameter to width).
+
+We will later give empirical evidence in support of that observation.
+
