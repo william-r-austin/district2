@@ -86,6 +86,7 @@ def Parse(filename):
                        float(points_unsplit[j].split(",")[1])]
                     for j in range(len(points_unsplit))]
         polygons.append(Polygon(points))
+        print(polygons[-1].exterior.xy)
     f.close()
     return C,A,polygons,[[x_min,y_min],[x_max,y_max]]
 
@@ -106,16 +107,19 @@ def PlotAll(C, A, polygons, bbox):
     plt.show(block=True)
 
 def GNUplot_polygon(p,f):
-    f.write("set object polygon from")
+    f.write("set object polygon from ")
     x,y = p.exterior.xy
     for i in range(len(x)):
         f.write(str(x[i])+","+str(y[i]))
         if i != len(x)-1:
             f.write(" to ")
-    f.write("fc rgb 'white'\n")
+    f.write(" fc rgb 'black' lc rgb 'black'\n")
 
 def GNUplot_point(p,f):
-    f.write('set object circle at '+str(p[0])+","+str(p[1])+' radius char 0.2 fillcolor rgb "'+colors[p[2]]+'"\n')
+    col = p[2]
+    if p[2] in colors:
+            col = colors[p[2]]
+    f.write('set object circle at '+str(p[0])+","+str(p[1])+' radius char 0.2 fillcolor rgb "'+col+'"\n')
 
 def GNUplot(C,A,polygons,bbox,outputfilename):
     f = open(outputfilename, "w")
@@ -125,7 +129,7 @@ def GNUplot(C,A,polygons,bbox,outputfilename):
         GNUplot_point(c,f)
     f.write("set xrange ["+str(bbox[0][0])+":"+str(bbox[1][0])+"]\n")
     f.write("set yrange ["+str(bbox[0][1])+":"+str(bbox[1][1])+"]\n")
-    f.write("plot x\n")
+    f.write("plot x lc rgb 'white'\n")
     f.write("pause -1\n")
     f.close()
 
@@ -147,6 +151,8 @@ def clip(polygons, boundary):
     for i in range(len(polygons)):
         p = polygons[i]
         p_clipped = p.intersection(boundary)
+        if type(p_clipped) == sg.collection.GeometryCollection:
+            p_clipped = p.difference(boundary)
         clipped.append(p_clipped)
     return clipped
     
@@ -159,6 +165,7 @@ if __name__ == '__main__':
     ## For testing : HERE we need to replace with the actual
     ## state boundary
     boundary = get_approx_boundary(A)
+    print(boundary.exterior.xy)
     
     clipped_polygons = clip(polygons, boundary)
     print(C_3D[0])
