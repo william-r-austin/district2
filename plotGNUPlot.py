@@ -166,8 +166,10 @@ def GNUplot(C,A,boundary,polygons, bbox,outputfilename):
         GNUplot_polygon(polygons[i], f)
     for i in range(len(boundary)):
         GNUplot_boundary(boundary[i],f)
-    f.write("set xrange ["+str(bbox[0][0])+":"+str(bbox[1][0])+"]\n")
-    f.write("set yrange ["+str(bbox[0][1])+":"+str(bbox[1][1])+"]\n")
+    offset_x = 0.1*(bbox[1][0]-bbox[0][0])
+    offset_y = 0.1*(bbox[1][1]-bbox[0][1])
+    f.write("set xrange ["+str(bbox[0][0]-offset_x)+":"+str(bbox[1][0]+offset_x)+"]\n")
+    f.write("set yrange ["+str(bbox[0][1]-offset_y)+":"+str(bbox[1][1]+offset_y)+"]\n")
     f.write("plot x lc rgb 'white'\n")
     f.write("pause -1\n")
     f.close()
