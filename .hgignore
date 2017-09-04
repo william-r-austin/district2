@@ -1,0 +1,13 @@
+syntax: glob
+data/
+do_redistrict
+district.xcodeproj/
+test_redistrict
+*.o
+*~
+*.pyc
+.DS_Store
+
+syntax: regexp
+.*\#.*\#$
+

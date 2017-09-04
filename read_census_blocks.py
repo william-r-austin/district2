@@ -1,5 +1,4 @@
 import shapefile
-#import shapely
 from shapely.geometry import shape
 
 '''Provides a procedure to read a shape file specifying census blocks,
