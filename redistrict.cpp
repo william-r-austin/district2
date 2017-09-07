@@ -31,6 +31,7 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
   vector<Point> new_centers(num_centers);
   int iter_count = 0;
   do {//iterate until stable
+    ++iter_count;
     for (int i = 0; i < clients.size(); ++i){
       //find distances to centers
       double dist_sq = numeric_limits<double>::infinity();
@@ -68,6 +69,10 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
     }
   }
   while (different and ++iter_count < 50);
+  cerr << "NUMBER OF ITERATIONS: " << iter_count << "\n";
+  if (different){
+    cerr << "FAILURE TO CONVERGE\n";
+  }
   vector<double> weights = find_weights(clients, centers, assignment);
   if (weights.size() > 0){
     return make_tuple(centers, assignment, weights);
