@@ -1,5 +1,5 @@
 Extract census blocks and populations
-  python3  read_shapefile.py <input_filename> <output_filename>
+  python3  read_census_blocks.py <input_filename> <output_filename>
 where <input_file> is a shape file specifying census blocks, 
 e.g. "tabblock010_44_pophu/tabblock2010_44_pophu"
 
