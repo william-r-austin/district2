@@ -19,7 +19,7 @@ is the name of a file (not including suffix) giving shape records for
 Next, compute the clustering using
    do_redistrict <k> <input_filename>
 where the first argument is the number of clusters to find, and the
-input file is in the format of the output of the previous script.
+input file is in the format of the output of the read_census_blocks.py script.
 This program sends some text indicating progress to standard err, and,
 when it terminates, sends the output to standard out.
  Output format:
