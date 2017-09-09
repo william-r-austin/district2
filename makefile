@@ -12,16 +12,17 @@ CCOMP = g++-7
 #CFLAGS = -g -DCHECK_SOLUTION -Wall
 DEBUG = -g 
 CFLAGS = -O3 -Wall 
-CPPFLAGS = -g -Wall -std=c++1z #-g  # -fms-extensions #-Wc++11-extensions
+CPPFLAGS = -O3 -Wall -std=c++1z
+#CPPFLAGS = -g -Wall -std=c++1z
 #CFLAGS = -O4 -DNDEBUG -DNO_ZERO_CYCLES
-BIN=cs2 do_redistrict
+BIN=cs2 do_redistrict test_initial_centers test_redistrict test_find_weights
 
 cs2.exe: cs2.c types_cs2.h timer.c assignment.hpp
 #	$(CCOMP) $(CFLAGS) -o $(BIN) cs2.c -lm
 	$(CCOMP) $(CFLAGS) -DPRINT_ANS -DCOMP_DUALS -DCOST_RESTART -o $(BIN) cs2.c -lm
 
 clean:
-	rm -f $(BIN) *~
+	rm -f $(BIN) *.o *~
 
 rand_float.o: rand_float.cpp rand_float.hpp
 	$(CCOMP) $(CPPFLAGS) -c rand_float.cpp
@@ -32,10 +33,10 @@ point.o: point.cpp point.hpp
 rand_point.o: rand_point.cpp rand_point.hpp
 	$(CCOMP) $(CPPFLAGS) -c rand_point.cpp
 
-initial_centers.o: initial_centers.cpp initial_centers.hpp point.hpp rand_float.hpp
+initial_centers.o: initial_centers.cpp initial_centers.hpp
 	$(CCOMP) $(CPPFLAGS) -c initial_centers.cpp
 
-test_initial_centers.o: test_initial_centers.cpp initial_centers.hpp point.hpp rand_float.hpp
+test_initial_centers.o: test_initial_centers.cpp initial_centers.hpp
 	$(CCOMP) $(CPPFLAGS) -c test_initial_centers.cpp
 
 test_initial_centers: test_initial_centers.o initial_centers.o point.o
@@ -73,5 +74,20 @@ test_find_weights.o: test_find_weights.cpp find_weights.hpp
 test_find_weights: test_find_weights.o find_weights.o point.o
 	$(CCOMP) $(CPPFLAGS) test_find_weights.o find_weights.o point.o -o test_find_weights
 
+test_mincostflow.o: test_mincostflow.cpp mincostflow.hpp
+	$(CCOMP) $(CPPFLAGS) -c test_mincostflow.cpp
 
+test_mincostflow: test_mincostflow.o mincostflow.o point.o
+	$(CCOMP) $(CPPFLAGS) test_mincostflow.o mincostflow.o point.o -o test_mincostflow
 
+mincostflow.hpp: assignment.hpp types_cs2.h
+
+point.hpp: rand_float.hpp
+
+print_out_solution.hpp: assignment.hpp
+
+rand_point.hpp: point.hpp
+
+redistrict.hpp: assignment.hpp point.hpp
+
+initial_centers.hpp: point.hpp
