@@ -22,6 +22,8 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
   Assignment assignment(clients.size());
   Assignment old_assignment(clients.size());
   vector<Point> centers;
+  vector<double> weights(num_centers);
+  
   bool different;
   for (int tries = 0; tries < 100; ++tries){
     cerr << tries << "\n";      
@@ -49,7 +51,7 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
       }
     }
     //find assignment of clients to centers
-    find_assignment(costs, populations, clients.size(), num_centers, assignment);
+    find_assignment(costs, populations, clients.size(), num_centers, assignment, weights);
     different = assignment != old_assignment;
     old_assignment = assignment;
     //move centers to centroids
@@ -72,13 +74,9 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
   if (different){
     cerr << "FAILURE TO CONVERGE\n";
   }
-  vector<double> weights = find_weights(clients, centers, assignment);
-  if (weights.size() > 0){
+  else {
     return make_tuple(centers, assignment, weights);
   }
   }
-  centers.clear();
-  vector<double> weights;
-  return make_tuple(centers, assignment, weights);
 }
   

@@ -1891,7 +1891,9 @@ void foo() {
   free(cap);
 }
 
-int find_assignment(long * costs, long * populations, int num_clients, int num_centers, Assignment &assignment){
+//weights is a vector whose size is number of centers
+
+int find_assignment(long * costs, long * populations, int num_clients, int num_centers, Assignment &assignment, std::vector<double> & weights){
   double t;
   arc *arp;
   node *ndp;
@@ -1979,6 +1981,13 @@ int find_assignment(long * costs, long * populations, int num_clients, int num_c
     }
   }
 
+  //find weights of centers
+  assert(weights.size() == num_centers);
+  //modern c++ way:transform(nodes + num_clients, nodes + num_clients + num_centers, weights.begin(), [](auto node){return -node.price;});
+  for (int j = 0; j < num_centers; ++j){
+    weights[j] = - nodes[num_clients + j].price;
+  }
+    
 #ifdef PRINT_ANS
   print_solution(ndp, arp, nmin, &cost);
 #endif
