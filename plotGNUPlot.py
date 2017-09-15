@@ -156,8 +156,8 @@ def GNUplot_point(p,f):
 
 def GNUplot(C,A,boundary,polygons, bbox,outputfilename):
     f = open(outputfilename, "w")
-    for c in C+A:
-        GNUplot_point(c,f)
+    # for c in C+A:
+    #     GNUplot_point(c,f)
     for i in range(len(polygons)):
         if type(polygons[i]) == sg.multipolygon.MultiPolygon:
             for p in polygons[i]:
