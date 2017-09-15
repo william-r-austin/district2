@@ -1893,7 +1893,7 @@ void foo() {
 
 //weights is a vector whose size is number of centers
 
-int find_assignment(long * costs, long * populations, int num_clients, int num_centers, Assignment &assignment, std::vector<double> & weights){
+int find_assignment(long * costs, long * populations, int num_clients, int num_centers, Assignment &assignment, std::vector<long> & weights){
   double t;
   arc *arp;
   node *ndp;

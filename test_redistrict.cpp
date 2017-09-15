@@ -37,5 +37,5 @@ int main(int argc, char *argv[]){
     cout << "FAILURE TO CONVERGE\n";
     return -1;
   }
-  print_out(num_centers, num_clients, centers, weights, clients, assignment);
+  //  print_out(num_centers, num_clients, centers, weights, clients, assignment);
 }

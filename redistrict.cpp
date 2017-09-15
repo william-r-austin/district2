@@ -4,7 +4,8 @@
 #include "initial_centers.hpp"
 #include "mincostflow.hpp"
 #include "redistrict.hpp"
-#include "find_weights.hpp"
+//#include "find_weights.hpp"
+#include "check_weights.hpp"
 
 /* 
  Assign initial center locations.
@@ -22,9 +23,10 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
   Assignment assignment(clients.size());
   Assignment old_assignment(clients.size());
   vector<Point> centers;
-  vector<double> weights(num_centers);
+  vector<long> int_weights(num_centers);
   
   bool different;
+  double scale;
   for (int tries = 0; tries < 100; ++tries){
     cerr << tries << "\n";      
     different = false;
@@ -44,14 +46,14 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
       }
     }
     //convert doubles to ints
-    double scale = (double) LONG_MAX / max_dist_sq/ (clients.size()*num_centers)/100;
+    scale = (double) LONG_MAX / max_dist_sq/ (clients.size()*num_centers)/100;
     for (int i = 0; i < clients.size(); ++i){
       for (int j = 0; j < centers.size(); ++j){
 	costs[i*num_centers+j] = (long) (scale * distances_sq[i*num_centers+j]);
       }
     }
     //find assignment of clients to centers
-    find_assignment(costs, populations, clients.size(), num_centers, assignment, weights);
+    find_assignment(costs, populations, clients.size(), num_centers, assignment, int_weights);
     different = assignment != old_assignment;
     old_assignment = assignment;
     //move centers to centroids
@@ -75,6 +77,9 @@ tuple<vector<Point>, Assignment, vector<double> > choose_centers(const vector<Po
     cerr << "FAILURE TO CONVERGE\n";
   }
   else {
+    vector<double> weights(int_weights.size());
+    transform(int_weights.begin(), int_weights.end(), weights.begin(), [scale](long w){return ((double) w)/scale;});
+    check_weights(clients, centers, assignment, weights);
     return make_tuple(centers, assignment, weights);
   }
   }

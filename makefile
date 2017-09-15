@@ -57,11 +57,11 @@ test_redistrict.o: test_redistrict.cpp redistrict.hpp rand_point.hpp
 do_redistrict.o: do_redistrict.cpp redistrict.hpp
 	$(CCOMP) $(CPPFLAGS) -c do_redistrict.cpp
 
-test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o point.o rand_point.o rand_float.o
-	$(CCOMP) $(CPPFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o rand_float.o -o test_redistrict
+test_redistrict: test_redistrict.o redistrict.o initial_centers.o  mincostflow.o check_weights.o point.o rand_point.o rand_float.o
+	$(CCOMP) $(CPPFLAGS) test_redistrict.o redistrict.o initial_centers.o mincostflow.o check_weights.o rand_point.o point.o rand_float.o -o test_redistrict
 
-do_redistrict: do_redistrict.o redistrict.o initial_centers.o  mincostflow.o find_weights.o rand_point.o rand_float.o point.o print_out_solution.o
-	$(CCOMP) $(CPPFLAGS) do_redistrict.o redistrict.o initial_centers.o mincostflow.o find_weights.o rand_point.o point.o print_out_solution.o rand_float.o -o do_redistrict
+do_redistrict: do_redistrict.o redistrict.o initial_centers.o  mincostflow.o check_weights.o rand_point.o rand_float.o point.o print_out_solution.o
+	$(CCOMP) $(CPPFLAGS) do_redistrict.o redistrict.o initial_centers.o mincostflow.o check_weights.o rand_point.o point.o print_out_solution.o rand_float.o -o do_redistrict
 
 find_weights.hpp: point.hpp
 
