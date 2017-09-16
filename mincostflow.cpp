@@ -10,6 +10,7 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+#include "check_weights.hpp"
 
 //#include <values.h>
 
@@ -1984,9 +1985,17 @@ int find_assignment(long * costs, long * populations, int num_clients, int num_c
   //find weights of centers
   assert(weights.size() == num_centers);
   //modern c++ way:transform(nodes + num_clients, nodes + num_clients + num_centers, weights.begin(), [](auto node){return -node.price;});
+  long minweight = std::numeric_limits<int>::max();
+  long maxweight = 0;
   for (int j = 0; j < num_centers; ++j){
     weights[j] = - nodes[num_clients + j].price;
+    if (weights[j] < minweight) minweight = weights[j];
+    if (weights[j] > maxweight) maxweight = weights[j];
   }
+  for (int j = 0; j < num_centers; ++j){
+    weights[j] -= minweight;
+  }
+  check_weights(costs, num_clients, num_centers, assignment, weights);
     
 #ifdef PRINT_ANS
   print_solution(ndp, arp, nmin, &cost);
