@@ -46,11 +46,11 @@ to produce a file that specifies:
    
 Format:
      <num centers> <num clients>
-     <center x> <center y> color
-     <center x> <center y> color
+     <center x> <center y> <color>
+     <center x> <center y> <color>
       .
       .
-      <center x> <center y> color
+      <center x> <center y> <color>
       <x> <y> <x> <y> ... <x> <y> 
       <x> <y> <x> <y> ... <x> <y> 
       .
