@@ -225,10 +225,11 @@ def GNUplot_point(p,f):
             col = colors[p[2]]
     f.write('set object circle at '+str(p[0])+","+str(p[1])+' radius char 0.2 fillcolor rgb "'+col+'"\n')
 
-def GNUplot(C,A,boundary,polygons, bbox,outputfilename):
+def GNUplot(C,A,boundary,polygons, bbox,outputfilename, print_p):
     f = open(outputfilename, "w")
-    # for c in C+A:
-    #     GNUplot_point(c,f)
+    if print_p:
+        for c in C+A:
+            GNUplot_point(c,f)
     for i in range(len(polygons)):
         # col = C[i][2]
         col = polygons[i][1]
@@ -249,14 +250,15 @@ def GNUplot(C,A,boundary,polygons, bbox,outputfilename):
     f.write("pause -1\n")
     f.close()
 
-def plot_helper(C_3D, A, boundary, polygons, bbox, outputfilename):
+def plot_helper(C_3D, A, boundary, polygons, bbox, outputfilename,
+                    print_p):
     # bbox = find_bounding_box(C_3D)
     # print(bbox)
     # minpt, maxpt = bbox
     # extent = find_extent([minpt,maxpt])
     # smallpt, bigpt = [minpt[i]-extent[i] for i in range(3)], [maxpt[i]+extent[i] for i in range(3)]
     # PlotAll(C_3D, A, polygons, bbox)
-    GNUplot(C_3D, A, boundary, polygons, bbox, outputfilename)
+    GNUplot(C_3D, A, boundary, polygons, bbox, outputfilename, print_p)
 
 def get_approx_boundary(A):
     Ap = [[p[0],p[1]] for p in A]
@@ -279,15 +281,20 @@ def clip(polygons, boundary):
     
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("Use: ", sys.argv[0], "[file name] [boundary file] [output GNUplot file]")
+        print("Use: ", sys.argv[0], "[file name] [boundary file] [output GNUplot file] [print point? True/False]")
         exit(-1)
     C_3D, A, polygons, bbox = Parse(sys.argv[1])
 
     ## For testing : HERE we need to replace with the actual
     ## state boundary
     # boundary = [get_approx_boundary(A)]
+    if sys.argv[4] == "True":
+        print_points = True
+    else: print_points = False
+    # Parse_and_plot_boundary(sys.argv[2])
     boundary = Parse_boundary(sys.argv[2])
 
     clipped_polygons = clip(polygons, boundary)
-    plot_helper(C_3D, A, boundary, clipped_polygons, bbox, sys.argv[3])
+    plot_helper(C_3D, A, boundary, clipped_polygons, bbox, sys.argv[3],
+                    print_points)
     
