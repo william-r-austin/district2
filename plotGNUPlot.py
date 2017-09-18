@@ -199,7 +199,18 @@ def GNUplot_boundary(p,f):
         f.write(str(x[i])+","+str(y[i]))
         if i != len(x)-1:
             f.write(" to ")
-    f.write(" fc rgb 'black' lc rgb 'black' lw 3\n")
+    f.write(" fc rgb 'black' lc rgb 'black' lw 2\n")
+
+
+def GNUplot_nonclipped(p,f):
+    f.write("set object polygon from ")
+    x,y = p.exterior.xy
+    for i in range(len(x)):
+        f.write(str(x[i])+","+str(y[i]))
+        if i != len(x)-1:
+            f.write(" to ")
+    f.write(" fc rgb 'light-grey' lw 1.5\n")
+    
 
     
 def GNUplot_polygon(p,f,color):
@@ -209,7 +220,7 @@ def GNUplot_polygon(p,f,color):
         f.write(str(x[i])+","+str(y[i]))
         if i != len(x)-1:
             f.write(" to ")
-    f.write(" fc rgb '"+color+"' fs solid lw 2\n")
+    f.write(" fc rgb '"+color+"' fs solid lw 1.5\n")
 
     f.write("set object polygon from ")
     x,y = p.exterior.xy
@@ -217,7 +228,7 @@ def GNUplot_polygon(p,f,color):
         f.write(str(x[i])+","+str(y[i]))
         if i != len(x)-1:
             f.write(" to ")
-    f.write(" fc rgb 'black' lw 2\n")
+    f.write(" fc rgb 'black' lw 1.5\n")
 
 def GNUplot_point(p,f):
     col = p[2]
@@ -225,11 +236,14 @@ def GNUplot_point(p,f):
             col = colors[p[2]]
     f.write('set object circle at '+str(p[0])+","+str(p[1])+' radius char 0.2 fillcolor rgb "'+col+'"\n')
 
-def GNUplot(C,A,boundary,polygons, bbox,outputfilename, print_p):
+def GNUplot(C, A, boundary, polygons, non_clipped,
+                bbox, outputfilename, print_p):
     f = open(outputfilename, "w")
     if print_p:
         for c in C+A:
             GNUplot_point(c,f)
+    for i in range(len(non_clipped)):
+        GNUplot_nonclipped(non_clipped[i],f)
     for i in range(len(polygons)):
         # col = C[i][2]
         col = polygons[i][1]
@@ -246,11 +260,15 @@ def GNUplot(C,A,boundary,polygons, bbox,outputfilename, print_p):
     offset_y = 0.1*(bbox[1][1]-bbox[0][1])
     f.write("set xrange ["+str(bbox[0][0]-offset_x)+":"+str(bbox[1][0]+offset_x)+"]\n")
     f.write("set yrange ["+str(bbox[0][1]-offset_y)+":"+str(bbox[1][1]+offset_y)+"]\n")
+    f.write("set key off\n")
+    f.write("set terminal pdf enhanced\n")
+    f.write("set output '"+outputfilename+".pdf'\n")
     f.write("plot x lc rgb 'white'\n")
-    f.write("pause -1\n")
+    # f.write("pause -1\n")
     f.close()
 
-def plot_helper(C_3D, A, boundary, polygons, bbox, outputfilename,
+def plot_helper(C_3D, A, boundary, polygons, non_clipped,
+                    bbox, outputfilename,
                     print_p):
     # bbox = find_bounding_box(C_3D)
     # print(bbox)
@@ -258,7 +276,8 @@ def plot_helper(C_3D, A, boundary, polygons, bbox, outputfilename,
     # extent = find_extent([minpt,maxpt])
     # smallpt, bigpt = [minpt[i]-extent[i] for i in range(3)], [maxpt[i]+extent[i] for i in range(3)]
     # PlotAll(C_3D, A, polygons, bbox)
-    GNUplot(C_3D, A, boundary, polygons, bbox, outputfilename, print_p)
+    GNUplot(C_3D, A, boundary, polygons, non_clipped,
+                bbox, outputfilename, print_p)
 
 def get_approx_boundary(A):
     Ap = [[p[0],p[1]] for p in A]
@@ -272,8 +291,10 @@ def clip(polygons, boundary):
             p = polygons[i]
             color = colors[i]
             if b.contains(p):
+                # print("here with", i)
                 new_clipped.append((p,color))
             elif p.intersects(b) :
+                # print("There with", i)
                 new_clipped.append((p.intersection(b), color))
     # for p in new_clipped:
     #     print(p)
@@ -295,6 +316,7 @@ if __name__ == '__main__':
     boundary = Parse_boundary(sys.argv[2])
 
     clipped_polygons = clip(polygons, boundary)
-    plot_helper(C_3D, A, boundary, clipped_polygons, bbox, sys.argv[3],
+    plot_helper(C_3D, A, boundary, clipped_polygons,
+                    polygons, bbox, sys.argv[3],
                     print_points)
     

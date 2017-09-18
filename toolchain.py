@@ -18,6 +18,7 @@ for state in states_code:
     cmd1 = "./do_redistrict "+str(nb_centers_state[state])+" data/pophu"+state
     cmd2 = "python3 Voronoi_boundaries.py c_output_"+"_"+id+"_"+state+" vor_output_"+"_"+id+"_"+state
     cmd3 = "python3 plotGNUPlot.py vor_output_"+"_"+id+"_"+state+" data/boundary_"+state+" gnuplot_"+"_"+id+"_"+state+" False"
+    
     # print(cmd1.split())
     f = open("c_output_"+"_"+id+"_"+state, "w")
     process = subprocess.Popen(cmd1.split(), stdout=f)
