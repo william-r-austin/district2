@@ -137,6 +137,7 @@ def PlotAll(C, A, assignment, bounded_regions, bbox, output):
         for i in range(len(x)):
             f.write(str(x[i])+","+str(y[i])+" ")
         f.write("\n") #x, y, color = 'black')
+    Plot_extra_lines(C, f)
     f.close()
     # plt.axis([bbox[0][0],bbox[1][0], bbox[0][1],bbox[1][1]])
     # plt.show(block=True)
@@ -207,8 +208,12 @@ def plot_regions(proj_regions):
         convex_hull = sg.MultiPoint(region).convex_hull
         x,y = convex_hull.exterior.xy
         plt.plot(x, y, color = 'black')
-        
-        
+
+
+def Plot_extra_lines(C,f):
+    diagram = sp.Voronoi(C)
+    
+    
 
 def unbounded(input_region): return any(x==-1 for x in input_region)
 ## insert points to remove
