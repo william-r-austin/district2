@@ -1,7 +1,9 @@
 Extract census blocks and populations
-  python3  read_census_blocks.py <input_filename> <output_filename>
-where <input_file> is a shape file specifying census blocks, 
-e.g. "tabblock010_44_pophu/tabblock2010_44_pophu"
+  python3  read_census_blocks.py <input directory name> <output_filename>
+where <input directory name> contains shape file specifying census blocks, e.g.
+          abblock010_44_pophu/tabblock2010_44_pophu
+which can be downloaded from https://www.census.gov/geo/maps-data/data/tiger-data.html
+(Select Population & Housing Unit Counts -- Blocks, then select a state.)
 
 The output file written has one line per client point.
 It specifies the x coordinate (longitude), the y coordinate
@@ -10,11 +12,10 @@ The script selects the point to be the centroid of the census block
 shape.  (WHAT HAPPENS IF THE SHAPE CONSISTS OF MULTIPLE POLYGONS?)
 
 Also, extract the boundary polygons of a state:
-  python3 read_state_shapefile.py <ST> <input filename>
- where <ST> is the two-letter abbreviation for a state, and <input filename>
-is the name of a file (not including suffix) giving shape records for
-  state boundaries, e.g. 
-   "/Users/klein/Downloads/cb_2016_us_state_500k/cb_2016_us_state_500k"
+  python3 read_state_shapefile.py <ST> <input directory name>
+ where <ST> is the two-letter abbreviation for a state, and <input directory name>
+is the name of a directory (not including suffix) giving shape records for
+  state boundaries, e.g. cb_2016_us_state_500k as downloaded from https://www.census.gov/geo/maps-data/data/cbf/cbf_state.html
 
 Next, compute the clustering using
    do_redistrict <k> <input_filename>
