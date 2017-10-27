@@ -256,6 +256,15 @@ def GNUplot(C, A, boundary, polygons, non_clipped,
         GNUplot_polygon(pol, f, col)
     for i in range(len(boundary)):
         GNUplot_boundary(boundary[i],f)
+
+    delta = max(bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1])
+    to_add = delta/2.0
+    if delta == bbox[1][1]-bbox[0][1]:
+        bbox[1][0] += to_add
+        bbox[0][0] -= to_add
+    else:
+        bbox[1][1] += to_add
+        bbox[0][1] -= to_add        
     offset_x = 0.1*(bbox[1][0]-bbox[0][0])
     offset_y = 0.1*(bbox[1][1]-bbox[0][1])
     f.write("set xrange ["+str(bbox[0][0]-offset_x)+":"+str(bbox[1][0]+offset_x)+"]\n")
