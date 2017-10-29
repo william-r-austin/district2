@@ -258,7 +258,9 @@ def GNUplot(C, A, boundary, polygons, non_clipped,
         GNUplot_boundary(boundary[i],f)
 
     delta = max(bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1])
-    to_add = delta/2.0
+    print(bbox)
+    print(delta)
+    to_add = (delta - min(bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1]))/2.0
     if delta == bbox[1][1]-bbox[0][1]:
         bbox[1][0] += to_add
         bbox[0][0] -= to_add
@@ -322,9 +324,10 @@ if __name__ == '__main__':
     if sys.argv[4] == "True":
         print_points = True
     else: print_points = False
+
     # Parse_and_plot_boundary(sys.argv[2])
     boundary = Parse_boundary(sys.argv[2])
-
+    
     clipped_polygons = clip(polygons, boundary)
     plot_helper(C_3D, A, boundary, clipped_polygons,
                     polygons, bbox, sys.argv[3],
