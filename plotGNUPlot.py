@@ -73,6 +73,8 @@ colors = [
 'mediumpurple3'      #8060c0 = 128  96 192
     ]
 
+colors = 2*colors
+
 def PlotAll(C, A, assignment, bounded_regions, bbox, output):
     diagram = sp.Voronoi(C)
     f = open(output, "w")
