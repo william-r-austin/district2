@@ -72,7 +72,6 @@ colors = [
 'orchid4',            #804080 = 128  64 128
 'mediumpurple3'      #8060c0 = 128  96 192
     ]
-
 colors = 2*colors
 
 def PlotAll(C, A, assignment, bounded_regions, bbox, output):
@@ -258,17 +257,6 @@ def GNUplot(C, A, boundary, polygons, non_clipped,
         GNUplot_polygon(pol, f, col)
     for i in range(len(boundary)):
         GNUplot_boundary(boundary[i],f)
-
-    delta = max(bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1])
-    print(bbox)
-    print(delta)
-    to_add = (delta - min(bbox[1][0]-bbox[0][0], bbox[1][1]-bbox[0][1]))/2.0
-    if delta == bbox[1][1]-bbox[0][1]:
-        bbox[1][0] += to_add
-        bbox[0][0] -= to_add
-    else:
-        bbox[1][1] += to_add
-        bbox[0][1] -= to_add        
     offset_x = 0.1*(bbox[1][0]-bbox[0][0])
     offset_y = 0.1*(bbox[1][1]-bbox[0][1])
     f.write("set xrange ["+str(bbox[0][0]-offset_x)+":"+str(bbox[1][0]+offset_x)+"]\n")
@@ -276,7 +264,6 @@ def GNUplot(C, A, boundary, polygons, non_clipped,
     f.write("set key off\n")
     f.write("set terminal pdf enhanced\n")
     f.write("set output '"+outputfilename+".pdf'\n")
-    f.write("set size square\n")
     f.write("plot x lc rgb 'white'\n")
     # f.write("pause -1\n")
     f.close()
@@ -326,10 +313,9 @@ if __name__ == '__main__':
     if sys.argv[4] == "True":
         print_points = True
     else: print_points = False
-
     # Parse_and_plot_boundary(sys.argv[2])
     boundary = Parse_boundary(sys.argv[2])
-    
+
     clipped_polygons = clip(polygons, boundary)
     plot_helper(C_3D, A, boundary, clipped_polygons,
                     polygons, bbox, sys.argv[3],

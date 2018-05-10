@@ -72,7 +72,7 @@ colors = [
 'orchid4',            #804080 = 128  64 128
 'mediumpurple3'      #8060c0 = 128  96 192
     ]
-
+colors=2*colors
     
 
         
@@ -118,10 +118,18 @@ def Parse(filename):
     f.close()
     return C,A,assign_pairs, [[x_min,y_min,z_min],[x_max,y_max,z_max]]
 
+def region2polygon(bounded_region):
+    '''
+    Given a projected region (a set of points)
+    return a Polygon (the convex hull)
+    '''
+    return sg.MultiPoint(bounded_region).convex_hull
+
+def region2boundary(bounded_region):
+    return region2polygon(bounded_region).exterior
+
 def PlotAll(C, A, assignment, bounded_regions, bbox, output):
-    diagram = sp.Voronoi(C)
     f = open(output, "w")
-    # sp.voronoi_plot_2d(diagram)
     f.write(str(len(C))+" "+str(len(A))+"\n")
     for i in range(len(C)):
         f.write(str(C[i][0])+" "+str(C[i][1])+" "+str(colors[i])+"\n")
@@ -182,7 +190,10 @@ def EuclidExample2(ncenters):
     # return sp.Voronoi(C)
 
 def find_proj(bounded_regions):
-    proj_regions = {}
+    #PK: The outer loop seems not a good idea.
+    # Why not just provide code for handling a single bounded region,
+    # and then use it in a comprehension?
+    proj_regions = {} #PK: Why is this a dictionary?
     # print(bounded_regions)
     for i in range(len(bounded_regions)):
         region = bounded_regions[i]
@@ -197,8 +208,27 @@ def find_proj(bounded_regions):
                 t = -p1[2]/v[2]
                 proj_point = [p1[0] + t*v[0],
                               p1[1] + t*v[1]]
+                #PK: Could use a default dictionary
                 proj_regions[i].append(proj_point)
     return proj_regions
+
+def project_region(region_3d):
+    #region_3d specified by vertices of a 3d Voronoi cell
+    #output is a list of points, the intersection
+    #with the z=0 plane of line segments between input vertices
+    pts = []
+    for p1 in region:
+        if p1[2] < 0: continue
+        for p2 in region:
+            if p2[2] > 0: continue
+            v = [p2[0]-p1[0],
+                 p2[1]-p1[1],
+                 p2[2]-p1[2]]
+            t = -p1[2]/v[2]
+            proj_point = [p1[0] + t*v[0],
+                          p1[1] + t*v[1]]
+            pts.append(proj_point)
+    return pts
 
 def plot_regions(proj_regions):
 
@@ -209,7 +239,6 @@ def plot_regions(proj_regions):
         x,y = convex_hull.exterior.xy
         plt.plot(x, y, color = 'black')
 
-
 def Plot_extra_lines(C,f):
     diagram = sp.Voronoi(C)
     
@@ -219,8 +248,7 @@ def unbounded(input_region): return any(x==-1 for x in input_region)
 ## insert points to remove
 ## infinite regions
 
-def plot_helper(C_3D, A, assign_pairs,bbox, outputfile):
-    C = [[p[0],p[1]] for p in C_3D]
+def get_proj_regions(C_3D, bbox):
     # bbox = find_bounding_box(C_3D)
     minpt, maxpt = bbox
     extent = find_extent([minpt,maxpt])
@@ -237,14 +265,14 @@ def plot_helper(C_3D, A, assign_pairs,bbox, outputfile):
                        for region in diagram.regions
                        if region != [] and not unbounded(region)]
     proj_regions = find_proj(bounded_regions)
-    PlotAll(C,A,assign_pairs, proj_regions, bbox, outputfile)
-
+    return proj_regions
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
         print("Use: ", sys.argv[0], "[file name] [output file name]")
         exit(-1)
     C_3D, A, assign_pairs, box = Parse(sys.argv[1])
-    # Parse_and_plot_boundary(sys.argv[2])
-    plot_helper(C_3D, A, assign_pairs, box, sys.argv[2])
+    C = [[p[0],p[1]] for p in C_3D]
+    proj_regions = get_proj_regions(C_3D, box)
+    PlotAll(C, A, assign_pairs, proj_regions, box, sys.argv[2])
     
