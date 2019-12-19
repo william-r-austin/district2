@@ -232,9 +232,12 @@ def GNUplot_polygon(p,f,color):
     f.write(" fc rgb 'black' lw 1.5\n")
 
 def GNUplot_point(p,f):
+    # print("Plotting point. p = ", p)
+    # print("More plotting. f = ", f)
     col = p[2]
     if p[2] in colors:
-            col = colors[p[2]]
+        #col = colors[p[2]]
+        col = p[2]
     f.write('set object circle at '+str(p[0])+","+str(p[1])+' radius char 0.2 fillcolor rgb "'+col+'"\n')
 
 def GNUplot(C, A, boundary, polygons, non_clipped,
@@ -294,8 +297,10 @@ def clip(polygons, boundary):
             if b.contains(p):
                 # print("here with", i)
                 new_clipped.append((p,color))
-            elif p.intersects(b) :
+            elif p.intersects(b):
                 # print("There with", i)
+                # print("p is valid = " + str(p.is_valid))
+                # print("b is valid = " + str(b.is_valid))
                 new_clipped.append((p.intersection(b), color))
     # for p in new_clipped:
     #     print(p)
